@@ -1,0 +1,35 @@
+{{define "content"}}
+<!-- Begin Page Content -->
+<div class="container-fluid">
+
+  <!-- Page Heading -->
+  <h1 class="h3 mb-4 text-gray-800">Create app</h1>
+
+  <div class="card shadow mb-4">
+    <div class="card-header py-3">
+      <h6 class="m-0 font-weight-bold text-primary">Field with * is required</h6>
+    </div>
+    <div class="card-body">
+      <div id="create_application_form">
+        <div class="form-group">
+          <label for="InputName">Application name *</label>
+          <input type="text" name="name" class="form-control" id="InputName" aria-describedby="nameHelp" placeholder="Enter application name">
+          <small id="nameHelp" class="form-text text-muted">My new Application</small>
+        </div>
+        <div class="form-group">
+          <label for="InputDescription">Application description *</label>
+          <input type="text" name="description" class="form-control" id="InputDescription" aria-describedby="descriptionHelp" placeholder="Enter application description">
+          <small id="descriptionHelp" class="form-text text-muted">My messenger</small>
+        </div>
+        <div class="form-group">
+          <label for="InputDomains">Domains *</label>
+          <input type="text" name="domains" class="form-control" id="domainsHelp" aria-describedby="descriptionHelp" placeholder="Enter domains separated by comma">
+          <small id="domainsHelp" class="form-text text-muted">localhost, example.com</small>
+        </div>
+        <button type="button" onclick="createApplication()" class="btn btn-primary">Create</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- /.container-fluid -->
+{{end}}
