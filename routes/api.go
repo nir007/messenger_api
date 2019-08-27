@@ -12,12 +12,14 @@ func InitApi(r *gin.Engine) {
 	r.POST("/login", ginAuthJWT.LoginHandler)
 
 	manage := r.Group("manage")
+	manage.Use(ginAuthJWT.MiddlewareFunc())
 	//manage.Use(application.ApplcationAccess())
 
 	manage.POST("/applications", application.CreateApp)
 	manage.GET("/applications/:id", application.FindOneApp)
 	manage.GET("/applications", application.FindAllApp)
 	manage.PUT("/applications", application.UpdateApp)
+	manage.PUT("/applications/secret-key", application.UpdateAppSecret)
 	manage.DELETE("/applications", application.DeleteApp)
 
 	manage.POST("/users", application.CreateUser)

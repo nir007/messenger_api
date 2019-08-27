@@ -1,10 +1,59 @@
 {{define "content"}}
 	<!-- Begin Page Content -->
 	<div class="container-fluid">
-
 	<!-- Page Heading -->
-	<h1 class="h3 mb-4 text-gray-800">Blank Page</h1>
+	<h1 class="h3 mb-4 text-gray-800">Applications</h1>
+      <p id="emptyApplicationsMessage" class="text-hide">
+        There are not any applications.
+        <a href="/admin/create_application">Create first application</a>
+      </p>
+
+      <table class="table table-bordered bg-white" id="applications">
+        <thead>
+        <tr>
+          <th scope="col">Name</th>
+          <th scope="col">Description</th>
+          <th scope="col">Domains</th>
+          <th scope="col">Secret</th>
+          <th scope="col">Created</th>
+          <th scope="col">Updated</th>
+          <th scope="col">Open</th>
+        </tr>
+        </thead>
+          <tbody>
+          </tbody>
+      </table>
 
 	</div>
 	<!-- /.container-fluid -->
+
+  <script type="text/javascript" defer>
+   function getApps() {
+      getApplications("", function (apps) {
+        let tbody = $('#applications').find('tbody');
+
+        if (apps.length === 0) {
+          $('#applications').hide();
+          $('#emptyApplicationsMessage').removeClass('text-hide');
+          return
+        }
+
+        for(let i in apps) {
+          let item = '<tr>';
+          item += '<td>' + apps[i].name + '</td>';
+          item += '<td>' + apps[i].description + '</td>';
+          item += '<td>' + apps[i].domains + '</td>';
+          item += '<td>' + apps[i].secret + '</td>';
+          item += '<td>' + apps[i].createdAt + '</td>';
+          item += '<td>' + apps[i].updatedAt + '</td>';
+          item += '<td><a href="/admin/application/'+ apps[i].id +'">Open</a></td>';
+          item += '</tr>';
+
+          tbody.append(item);
+        }
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", getApps);
+  </script>
 {{end}}

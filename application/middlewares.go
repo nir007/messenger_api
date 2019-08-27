@@ -9,6 +9,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/appleboy/gin-jwt"
 	"golang.org/x/crypto/bcrypt"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 func ApplcationAccess() gin.HandlerFunc {
@@ -31,7 +33,7 @@ func ApplcationAccess() gin.HandlerFunc {
 }
 
 type login struct {
-	Email string `form:"email" json:"email" binding:"required"`
+	Email string `form:"email" json:"email" binding:"required,email"`
 	Password string `form:"password" json:"password" binding:"required"`
 }
 
@@ -41,10 +43,6 @@ type AuthMiddleware struct {
 	Timeout      time.Duration
 	MaxRefresh   time.Duration
 	IdentityKey  string
-}
-
-func (a *AuthMiddleware) Init() {
-
 }
 
 func (a *AuthMiddleware) GetAuthMiddleware() (*jwt.GinJWTMiddleware, error) {
@@ -66,8 +64,15 @@ func (a *AuthMiddleware) GetAuthMiddleware() (*jwt.GinJWTMiddleware, error) {
 		},
 		IdentityHandler: func(c *gin.Context) interface{} {
 			claims := jwt.ExtractClaims(c)
+
+			fmt.Println("claims[a.IdentityKey]: ", claims[a.IdentityKey])
+
+			id, _ := primitive.ObjectIDFromHex(claims[a.IdentityKey].(string))
+
+			c.Set("managerId", claims[a.IdentityKey].(string))
+
 			return Manager{
-				ID: claims[a.IdentityKey].(string),
+				ID: id,
 				Email: claims["email"].(string),
 			}
 		},
@@ -78,13 +83,12 @@ func (a *AuthMiddleware) GetAuthMiddleware() (*jwt.GinJWTMiddleware, error) {
 				return "", jwt.ErrMissingLoginValues
 			}
 
-			email := loginValues.Email
-			password := loginValues.Password
-
 			manager := Manager{}
-			err = manager.FindOne(map[string]interface{}{"email": email})
+			err = manager.FindOne(bson.M{"email": loginValues.Email})
 
-			if err := bcrypt.CompareHashAndPassword([]byte(manager.Password), []byte(password)); err == nil {
+			if err := bcrypt.CompareHashAndPassword(
+				[]byte(manager.Password), []byte(loginValues.Password));
+				err == nil {
 				return manager, nil
 			}
 
@@ -101,7 +105,7 @@ func (a *AuthMiddleware) GetAuthMiddleware() (*jwt.GinJWTMiddleware, error) {
 		Unauthorized: func(c *gin.Context, code int, message string) {
 			contentType := c.Request.Header["Content-Type"]
 			if len(contentType) == 0 || contentType[0] != "application/json" {
-				c.Redirect(http.StatusMovedPermanently, "/login")
+				c.Redirect(http.StatusMovedPermanently, "/login?m=send_auth_token")
 				return
 			}
 
@@ -111,14 +115,8 @@ func (a *AuthMiddleware) GetAuthMiddleware() (*jwt.GinJWTMiddleware, error) {
 			})
 		},
 
-		TokenLookup: "header: Authorization, query: token, cookie: jwt",
-		// TokenLookup: "query:token",
-		// TokenLookup: "cookie:token",
-
-		// TokenHeadName is a string in the header. Default value is "Bearer"
+		TokenLookup: "header: Authorization, query: token, cookie: gopa",
 		TokenHeadName: "Bearer",
-
-		// TimeFunc provides the current time. You can override it to use another time value. This is useful for testing or if your server uses a different time zone than your tokens.
 		TimeFunc: time.Now,
 	})
 
@@ -127,39 +125,4 @@ func (a *AuthMiddleware) GetAuthMiddleware() (*jwt.GinJWTMiddleware, error) {
 	}
 
 	return middleware, err
-}
-
-type managerExists struct {
-	Email string `json:"email" binding:"required"`
-}
-
-func ManagerExists() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		manager := &Manager{}
-		filter := &managerExists{}
-		err := c.Bind(filter)
-
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": err,
-			})
-			c.Abort()
-			return
-		}
-
-		err = manager.FindOne(map[string]interface{}{"email": filter.Email})
-
-		if err == nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": "user already exists",
-			})
-			c.Abort()
-			return
-		}
-
-		// before request
-		c.Next()
-
-		// after request
-	}
 }

@@ -1,3 +1,58 @@
+function createUser() {
+  const form = $('#create_user_form');
+
+  const data = {
+    name: form.find('input[name="name"]').val(),
+    uid: form.find('input[name="uid"]').val(),
+    second: form.find('input[name="second"]').val(),
+    gender: form.find('select[name="gender"]').val(),
+    applicationID: form.find('input[name="appId"]').val(),
+    email: form.find('input[name="email"]').val(),
+    phone: form.find('input[name="phone"]').val(),
+  };
+
+  $.ajax({
+    url: "/manage/users",
+    method: "POST",
+    dataType: 'json',
+    data: JSON.stringify(data),
+    headers: {
+      "Content-Type":"application/json"
+    },
+    success: function (res) {
+
+    },
+    error: function (res) {
+      alert('Error')
+    }
+  }).done(function (res) {
+    console.log(res)
+  })
+}
+
+function ajaxGetUsers(applicationId, beforeSend, success) {
+  let params = beforeSend();
+  console.log(params);
+  $.ajax({
+    url: "/manage/users?applicationid=" + applicationId + "&page=" + params.page + "&perpage=" + params.perPage,
+    method: "GET",
+    dataType: 'json',
+    headers: {
+      "Content-Type":"application/json"
+    },
+    success: function (res) {
+      if (typeof success === "function") {
+        success(res.result, res.total);
+      }
+    },
+    error: function (res) {
+      alert('Error')
+    }
+  }).done(function (res) {
+    console.log(res)
+  })
+}
+
 function createApplication() {
   const form = $('#create_application_form');
 
@@ -40,7 +95,9 @@ function createApplication() {
       "Content-Type":"application/json"
     },
     success: function (res) {
-      //location.href = '/admin/application/' + res.ID
+      if (typeof res.result.id !== 'undefined') {
+        location.href = '/admin/application/' + res.result.id
+      }
     },
     error: function (res) {
       alert('Error')
@@ -48,4 +105,57 @@ function createApplication() {
   }).done(function (res) {
     console.log(res)
   })
+}
+
+function refreshSecretKey(appId) {
+  let form = $('#update_application_form');
+  $.ajax({
+    url: "/manage/applications/secret-key",
+    method: "PUT",
+    dataType: 'json',
+    data: JSON.stringify({id: appId}),
+    headers: {
+      "Content-Type":"application/json"
+    },
+    success: function (res) {
+      form.find('input[name="secret"]').val(res.result)
+    },
+    error: function (res) {
+      alert('Error')
+    }
+  }).done(function (res) {
+    console.log(res)
+  })
+}
+
+function getApplications(managerId, success) {
+  $.ajax({
+    url: "/manage/applications?manager_id=" + managerId,
+    method: "GET",
+    dataType: 'json',
+    headers: {
+      "Content-Type":"application/json"
+    },
+    success: function (res) {
+      if (typeof success === "function") {
+        success(res.result);
+      }
+    },
+    error: function (res) {
+      alert('Error')
+    }
+  }).done(function (res) {
+    console.log(res)
+  })
+}
+
+function deleteCookie( name ) {
+  document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:01 GMT;path=/';
+}
+
+function logout() {
+  deleteCookie('jwt');
+  deleteCookie('gopa');
+  deleteCookie('jwtExpire');
+  location.href = '/login'
 }

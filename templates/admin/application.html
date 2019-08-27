@@ -1,0 +1,184 @@
+{{define "content"}}
+	<!-- Begin Page Content -->
+	<div class="container-fluid">
+
+	<!-- Page Heading -->
+	<h1 class="h3 mb-4 text-gray-800">{{.title}}</h1>
+
+      <div class="row">
+        <div class="col-md-7">
+          <div class="card shadow mb-4">
+            <div class="card-header py-3">
+              <h6 class="m-0 font-weight-bold text-primary">{{.name}}</h6>
+            </div>
+            <div class="card-body">
+              <div id="update_application_form">
+                <div class="form-group">
+                  <label for="InputName">Application name *</label>
+                  <input value="{{.name}}" type="text" name="name" class="form-control" id="InputName" placeholder="Enter application name">
+                </div>
+                <div class="form-group">
+                  <label for="InputName">Secret Key</label>
+                  <div class="input-group mb-3">
+                    <input name="secret" type="text" disabled class="form-control" value="{{.secret}}" title="Use for API requests">
+                    <div class="input-group-append">
+                      <button onclick="refreshSecretKey('{{.appId}}')" class="btn btn-success" type="button">Refresh</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="InputDescription">Application description *</label>
+                  <input value="{{.description}}" type="text" name="description" class="form-control" id="InputDescription" placeholder="Enter application description">
+                </div>
+                <div class="form-group">
+                  <label for="InputDomains">Domains *</label>
+                  <input value="{{.domains}}" type="text" name="domains" class="form-control" placeholder="Enter domains separated by comma">
+                  <small id="domainsHelp" class="form-text text-muted">localhost, example.com</small>
+                </div>
+                <div class="form-group">
+                  <label for="InputDomains">Created At</label>
+                  <input value="{{.createdAt}}" type="text" disabled class="form-control">
+                </div>
+                <div class="form-group">
+                  <label for="InputDomains">Updated At</label>
+                  <input value="{{.updatedAt}}" type="text" disabled class="form-control">
+                </div>
+                <button type="button" onclick="createApplication()" class="btn btn-primary">Save changes</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-5">
+          <div class="card shadow mb-4">
+            <div class="card-header py-3">
+              <div class="row">
+                <div class="col-md-6">
+                  <h6 class="m-0 font-weight-bold text-primary">Users</h6>
+                </div>
+                <div class="col-md-6 text-right">
+                  <a href="#exampleModalCenter" data-toggle="modal" data-target="#exampleModalCenter" class="btn btn-success btn-circle btn-sm">
+                    <i class="fas fa-user-plus"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="input-group">
+                <input type="text" class="form-control bg-light border-0 small" placeholder="Search for..." aria-label="Search" aria-describedby="basic-addon2">
+                <div class="input-group-append">
+                  <button class="btn btn-primary" type="button">
+                    <i class="fas fa-search fa-sm"></i>
+                  </button>
+                </div>
+              </div> <br>
+              <div id="users"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+	</div>
+	<!-- /.container-fluid -->
+
+  <!-- Modal -->
+  <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalCenterTitle">Add user</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div id="create_user_form">
+            <div class="form-group">
+              <label for="InputName">User ID *</label>
+              <input type="text" name="uid" class="form-control" placeholder="Enter id">
+              <small id="domainsHelp" class="form-text text-muted">User id from yours project (unique)</small>
+            </div>
+            <div class="form-group">
+              <label for="InputName">Name *</label>
+              <input type="text" name="name" class="form-control" placeholder="Enter name">
+            </div>
+            <div class="form-group">
+              <label for="InputName">Second name *</label>
+              <input type="text" name="second" class="form-control" placeholder="Enter second name">
+            </div>
+            <div class="form-group">
+              <label for="InputName">Gender *</label>
+              <select id="inputState" name="gender" class="form-control">
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="InputName">Email</label>
+              <input type="text" name="email" class="form-control" placeholder="Enter email">
+            </div>
+            <div class="form-group">
+              <label for="InputName">Phone</label>
+              <input type="text" name="phone" class="form-control" placeholder="Enter phone">
+            </div>
+            <input type="hidden" name="appId" value="{{.appId}}">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" onclick="createUser()" class="btn btn-primary">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script type="text/javascript" defer>
+  function getUsers() {
+    const perPage = 1;
+    ajaxGetUsers("{{.appId}}", function(){
+      $('#loadMoreUsers').remove();
+      let body = $('#users');
+      let page = 1;
+      let count = body.find('.user-card').length;
+
+      if (count < 0) {
+        page = Math.round(count / perPage);
+      }
+
+      return {
+        perPage: perPage,
+        page: page
+      };
+    }, function (users, total) {
+      let body = $('#users');
+      let count = body.find('.user-card').length;
+
+      for(let i in users) {
+        let item = '<div class="card border-0 h-50 user-card">';
+        item += '<div class="card-body border-bottom">';
+        item += '<div class="row">';
+        item += '<div class="col-auto">';
+        item += '<a class="thumbnail pull-left" href="#">';
+        item += '<img class="media-object rounded-circle" src="https://source.unsplash.com/QAB-WJcbgJk/60x60">';
+        item += '</a>';
+        item += '</div>';
+        item += '<div class="col">';
+        item += '<h4 class="media-heading">'+ users[i].name + ' '+ users[i].second +'</h4>';
+        item += '<p><span class="label label-info">'+ users[i].email +'</span>';
+        item += '<span class="label label-primary">'+ users[i].phone +'</span></p>';
+        item += '</div>';
+        item += '</div>';
+        item += '</div>';
+        item += '</div>';
+
+        body.append(item);
+      }
+
+      if (count < total) {
+        body.append('<button id="loadMoreUsers" onclick="getUsers()" type="button" class="btn btn-primary btn-lg btn-block">Load more</button>');
+      }
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", getUsers);
+</script>
+
+{{end}}

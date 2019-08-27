@@ -42,8 +42,10 @@ function login() {
       "Content-Type":"application/json"
     },
     success: function (res) {
-      document.cookie = "jwt="+res.token; // обновляем только куки с именем 'user'
-      document.cookie = "jwtExpire="+res.expire; // обновляем только куки с именем 'user'
+      let date = new Date();
+      date.setTime(date.getTime() + (100 * 24*60*60*1000));
+      document.cookie = "gopa="+res.token + "; expires=" + date.toUTCString() + ';path=/';
+      document.cookie = "jwtExpire="+res.expire + "; expires=" + date.toUTCString() + ';path=/';
       location.href = '/admin/dashboard'
     },
     error: function (res) {
