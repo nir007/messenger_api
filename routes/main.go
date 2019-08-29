@@ -1,25 +1,28 @@
 package routes
 
 import (
-	"strconv"
-	"messenger/config"
 	"messenger/application"
+	"messenger/config"
+	"strconv"
 	"time"
-	"github.com/appleboy/gin-jwt"
+
+	jwt "github.com/appleboy/gin-jwt"
 )
 
 var ginAuthJWT *jwt.GinJWTMiddleware
 
-func init()  {
-	duration, _ := strconv.ParseInt(config.Main["jwt"]["Timeout"], 10, 64)
-	maxRefresh, _ := strconv.ParseInt(config.Main["jwt"]["MaxRefresh"], 10, 64)
+func init() {
+	conf, _ := config.Get("jwt")
+
+	duration, _ := strconv.ParseInt(conf["timeout"].(string), 10, 64)
+	maxRefresh, _ := strconv.ParseInt(conf["maxRefresh"].(string), 10, 64)
 
 	am := &application.AuthMiddleware{
-		Realm: config.Main["jwt"]["Realm"],
-		Key: []byte(config.Main["jwt"]["Key"]),
-		Timeout: time.Hour * time.Duration(duration),
-		MaxRefresh: time.Hour * time.Duration(maxRefresh),
-		IdentityKey: config.Main["jwt"]["IdentityKey"],
+		Realm:       conf["realm"].(string),
+		Key:         []byte(conf["key"].(string)),
+		Timeout:     time.Hour * time.Duration(duration),
+		MaxRefresh:  time.Hour * time.Duration(maxRefresh),
+		IdentityKey: conf["identityKey"].(string),
 	}
 	ginAuthJWT, _ = am.GetAuthMiddleware()
 }

@@ -1,0 +1,5 @@
+realm: "sitius"
+key: "2koghrhjsdfdfsfwe"
+timeout: 100
+maxRefresh: 10
+identityKey: "id"

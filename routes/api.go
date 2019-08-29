@@ -1,12 +1,12 @@
 package routes
 
 import (
-	"github.com/gin-gonic/gin"
 	"messenger/application"
+
+	"github.com/gin-gonic/gin"
 )
 
 func InitApi(r *gin.Engine) {
-
 	r.POST("/registration", application.CreateManager)
 	r.GET("/confirm", application.CreateManager)
 	r.POST("/login", ginAuthJWT.LoginHandler)

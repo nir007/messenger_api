@@ -32,7 +32,7 @@
     ".",
     "binding",
     "internal/json",
-    "render",
+    "render"
   ]
   pruneopts = "UT"
   revision = "b75d67cd51eb53c3c3a2fc406524c940021ffbda"
@@ -157,7 +157,7 @@
     "x/mongo/driver/session",
     "x/mongo/driver/topology",
     "x/mongo/driver/uuid",
-    "x/mongo/driver/wiremessage",
+    "x/mongo/driver/wiremessage"
   ]
   pruneopts = "UT"
   revision = "d42ea7239f0db8a61e77191b9f2730a922459042"
@@ -170,7 +170,7 @@
   packages = [
     "bcrypt",
     "blowfish",
-    "pbkdf2",
+    "pbkdf2"
   ]
   pruneopts = "UT"
   revision = "4def268fd1a49955bfb3dda92fe3db4f924f2285"
@@ -200,7 +200,7 @@
     "internal/ucd",
     "transform",
     "unicode/cldr",
-    "unicode/norm",
+    "unicode/norm"
   ]
   pruneopts = "UT"
   revision = "342b2e1fbaa52c93f31447ad2c6abc048c63e475"
@@ -213,6 +213,17 @@
   pruneopts = "UT"
   revision = "5f1438d3fca68893a817e4a66806cea46a9e4ebf"
   version = "v8.18.2"
+
+[[projects]]
+  branch = "v2"
+  digest = "1:2642fd0b6900c77247d61d80cf2eb59a374ef4ffc2d25a1b95b87dc355b2894e"
+  name = "gopkg.in/mgo.v2"
+  packages = [
+    "bson",
+    "internal/json"
+  ]
+  pruneopts = "UT"
+  revision = "a6b53ec6cb22a3699387a57a161566f9402ee85b"
 
 [[projects]]
   digest = "1:4d2e5a73dc1500038e504a8d78b986630e3626dc027bc030ba5c75da257cdb96"
@@ -234,6 +245,8 @@
     "go.mongodb.org/mongo-driver/mongo",
     "go.mongodb.org/mongo-driver/mongo/options",
     "golang.org/x/crypto/bcrypt",
+    "gopkg.in/mgo.v2/bson",
+    "gopkg.in/yaml.v2"
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

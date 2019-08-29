@@ -1,11 +1,13 @@
 package application
 
 import (
-	"github.com/gin-gonic/gin"
-	"net/http"
-	"go.mongodb.org/mongo-driver/mongo"
-	"time"
 	"context"
+	"messenger/config"
+	"net/http"
+	"time"
+
+	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
@@ -14,14 +16,21 @@ var err error
 var ctx context.Context
 
 func init() {
+	conf, err := config.Get("mongodb")
+
+	if err != nil {
+		panic(err)
+	}
+
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	client, err = mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017"))
+	client, err = mongo.Connect(ctx, options.Client().ApplyURI(conf["connection"].(string)))
 
 	if err != nil {
 		panic(err)
 	}
 }
 
+// CreateApp creates applications
 func CreateApp(c *gin.Context) {
 	app := &Application{}
 	err := c.Bind(app)
@@ -158,7 +167,7 @@ func CreateManager(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"result": manager})
 }
-func FindOneManager(c *gin.Context) {}
+func FindOneManager(c *gin.Context)  {}
 func FindAllManagers(c *gin.Context) {}
-func UpdateManager(c *gin.Context) {}
-func DeleteManager(c *gin.Context) {}
+func UpdateManager(c *gin.Context)   {}
+func DeleteManager(c *gin.Context)   {}
