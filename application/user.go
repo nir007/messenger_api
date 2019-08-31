@@ -44,7 +44,8 @@ func (mc *User) Update() (int64, error) {
 
 //Insert  creates new document
 func (mc *User) Insert() (string, error) {
-	if err := mc.FindOne(bson.M{"uid": mc.UID}); err == nil {
+	find := &dto.FindUsers{UID: mc.UID}
+	if err := mc.FindOne(find); err == nil {
 		return "", fmt.Errorf("user with id: %s already exists", mc.UID)
 	}
 

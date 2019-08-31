@@ -43,8 +43,8 @@ func CreateApp(c *gin.Context) {
 		return
 	}
 
-	var managerID interface{}
-	if managerID, ok := c.Get("managerId"); !ok {
+	managerID, ok := c.Get("managerId")
+	if !ok {
 		c.JSON(http.StatusBadRequest, gin.H{"error": errors.New("undefined manager id")})
 		c.Abort()
 		return

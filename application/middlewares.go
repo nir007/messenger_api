@@ -3,12 +3,12 @@ package application
 import (
 	"fmt"
 	"log"
+	"messenger/dto"
 	"net/http"
 	"time"
 
 	jwt "github.com/appleboy/gin-jwt"
 	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -83,8 +83,9 @@ func (a *AuthMiddleware) GetAuthMiddleware() (*jwt.GinJWTMiddleware, error) {
 				return "", jwt.ErrMissingLoginValues
 			}
 
+			find := &dto.FindManagers{Email: loginValues.Email}
 			manager := Manager{}
-			err = manager.FindOne(bson.M{"email": loginValues.Email})
+			err = manager.FindOne(find)
 
 			if err := bcrypt.CompareHashAndPassword(
 				[]byte(manager.Password), []byte(loginValues.Password)); err == nil {

@@ -3,6 +3,7 @@ package routes
 import (
 	"html/template"
 	"messenger/application"
+	"messenger/dto"
 	"net/http"
 	"strings"
 
@@ -70,8 +71,9 @@ func InitPages(r *gin.Engine) {
 			id := c.Param("id")
 
 			objID, _ := primitive.ObjectIDFromHex(id)
-			app := &application.Application{ID: objID}
-			err := app.FindOne(c)
+			find := &dto.FindApplications{ID: objID}
+			app := &application.Application{}
+			err := app.FindOne(find)
 
 			if err != nil {
 				buildErrorPage(c, r, err)

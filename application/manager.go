@@ -43,7 +43,8 @@ func (mc *Manager) Update() (int64, error) {
 
 //Insert creates new document
 func (mc *Manager) Insert() (string, error) {
-	if err := mc.FindOne(bson.M{"email": mc.Email}); err == nil {
+	find := &dto.FindManagers{Email: mc.Email}
+	if err := mc.FindOne(find); err == nil {
 		return "", errors.New("user already exists")
 	}
 
