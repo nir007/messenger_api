@@ -1,14 +1,16 @@
 package routes
 
 import (
-	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"html/template"
 	"messenger/application"
 	"net/http"
 	"strings"
+
+	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+//InitPages adds routes for static pages
 func InitPages(r *gin.Engine) {
 	r.Static("/templates", "./templates")
 	r.StaticFS("/static", http.Dir("templates"))
@@ -67,8 +69,8 @@ func InitPages(r *gin.Engine) {
 		admin.GET("/application/:id", func(c *gin.Context) {
 			id := c.Param("id")
 
-			objId, _ := primitive.ObjectIDFromHex(id)
-			app := &application.Application{ID: objId}
+			objID, _ := primitive.ObjectIDFromHex(id)
+			app := &application.Application{ID: objID}
 			err := app.FindOne(c)
 
 			if err != nil {

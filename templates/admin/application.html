@@ -18,15 +18,6 @@
                   <input value="{{.name}}" type="text" name="name" class="form-control" id="InputName" placeholder="Enter application name">
                 </div>
                 <div class="form-group">
-                  <label for="InputName">Secret Key</label>
-                  <div class="input-group mb-3">
-                    <input name="secret" type="text" disabled class="form-control" value="{{.secret}}" title="Use for API requests">
-                    <div class="input-group-append">
-                      <button onclick="refreshSecretKey('{{.appId}}')" class="btn btn-success" type="button">Refresh</button>
-                    </div>
-                  </div>
-                </div>
-                <div class="form-group">
                   <label for="InputDescription">Application description *</label>
                   <input value="{{.description}}" type="text" name="description" class="form-control" id="InputDescription" placeholder="Enter application description">
                 </div>
@@ -34,6 +25,15 @@
                   <label for="InputDomains">Domains *</label>
                   <input value="{{.domains}}" type="text" name="domains" class="form-control" placeholder="Enter domains separated by comma">
                   <small id="domainsHelp" class="form-text text-muted">localhost, example.com</small>
+                </div>
+                <div class="form-group">
+                  <label for="InputName">Secret Key</label>
+                  <div class="input-group mb-3">
+                    <input name="secret" type="text" disabled class="form-control" value="{{.secret}}" title="Use for API requests">
+                    <div class="input-group-append">
+                      <button onclick="refreshSecretKey('{{.appId}}')" class="btn btn-success" type="button">Refresh</button>
+                    </div>
+                  </div>
                 </div>
                 <div class="form-group">
                   <label for="InputDomains">Created At</label>
@@ -132,15 +132,15 @@
 
 <script type="text/javascript" defer>
   function getUsers() {
-    const perPage = 1;
+    const perPage = 2;
     ajaxGetUsers("{{.appId}}", function(){
       $('#loadMoreUsers').remove();
       let body = $('#users');
       let page = 1;
       let count = body.find('.user-card').length;
 
-      if (count < 0) {
-        page = Math.round(count / perPage);
+      if (count > 0) {
+        page = Math.round(count / perPage) + 1;
       }
 
       return {
@@ -149,7 +149,6 @@
       };
     }, function (users, total) {
       let body = $('#users');
-      let count = body.find('.user-card').length;
 
       for(let i in users) {
         let item = '<div class="card border-0 h-50 user-card">';
@@ -157,7 +156,7 @@
         item += '<div class="row">';
         item += '<div class="col-auto">';
         item += '<a class="thumbnail pull-left" href="#">';
-        item += '<img class="media-object rounded-circle" src="https://source.unsplash.com/QAB-WJcbgJk/60x60">';
+        item += '<img class="media-object rounded-circle" width=60 height=60 src="/static/admin/img/149071.png">';
         item += '</a>';
         item += '</div>';
         item += '<div class="col">';
@@ -171,6 +170,8 @@
 
         body.append(item);
       }
+
+      let count = body.find('.user-card').length;
 
       if (count < total) {
         body.append('<button id="loadMoreUsers" onclick="getUsers()" type="button" class="btn btn-primary btn-lg btn-block">Load more</button>');

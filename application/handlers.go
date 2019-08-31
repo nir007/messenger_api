@@ -2,7 +2,9 @@ package application
 
 import (
 	"context"
+	"errors"
 	"messenger/config"
+	"messenger/dto"
 	"net/http"
 	"time"
 
@@ -30,44 +32,10 @@ func init() {
 	}
 }
 
-// CreateApp creates applications
+// CreateApp creates new application
 func CreateApp(c *gin.Context) {
 	app := &Application{}
 	err := c.Bind(app)
-
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
-		c.Abort()
-		return
-	}
-
-	_, err = app.Insert(c)
-
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
-		c.Abort()
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"result": app,
-	})
-}
-func FindOneApp(c *gin.Context) {}
-func FindAllApp(c *gin.Context) {
-	managerId := c.Query("manager_id")
-
-	if len(managerId) == 0 {
-		id, _ := c.Get("managerId")
-		managerId = id.(string)
-	}
-
-	app := &Application{Managers: []string{managerId}}
-	apps, err := app.Find(c)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -75,11 +43,59 @@ func FindAllApp(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"result": apps})
+	var managerID interface{}
+	if managerID, ok := c.Get("managerId"); !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"error": errors.New("undefined manager id")})
+		c.Abort()
+		return
+	}
+
+	app.Managers = append(app.Managers, managerID.(string))
+
+	_, err = app.Insert()
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.Abort()
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"result": app})
+}
+
+// FindOneApp handles http request
+func FindOneApp(c *gin.Context) {}
+
+// FindAllApp handles http request
+func FindAllApp(c *gin.Context) {
+	find := &dto.FindApplications{}
+	c.ShouldBind(find)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.Abort()
+		return
+	}
+
+	if len(find.ManagerID) == 0 {
+		id, _ := c.Get("managerId")
+		find.Managers = append(find.Managers, id.(string))
+	}
+
+	app := &Application{}
+	apps, total, err := app.Find(find)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.Abort()
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"result": apps, "total": total})
 }
 func UpdateApp(c *gin.Context) {}
 func UpdateAppSecret(c *gin.Context) {
-	updateApplicationSecret := &UpdateApplicationSecret{}
+	updateApplicationSecret := &dto.UpdateApplicationSecret{}
 	err := c.Bind(updateApplicationSecret)
 
 	if err != nil {
@@ -89,7 +105,7 @@ func UpdateAppSecret(c *gin.Context) {
 	}
 
 	application := &Application{ID: updateApplicationSecret.ID}
-	_, err = application.Update(c)
+	_, err = application.Update()
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -123,7 +139,7 @@ func CreateUser(c *gin.Context) {
 }
 func FindOneUser(c *gin.Context) {}
 func FindAllUsers(c *gin.Context) {
-	find := &FindUsers{}
+	find := &dto.FindUsers{}
 	c.ShouldBind(find)
 
 	if err != nil {
@@ -134,7 +150,7 @@ func FindAllUsers(c *gin.Context) {
 
 	user := &User{ApplicationID: find.ApplicationID}
 
-	users, total, err := user.Find(c, find)
+	users, total, err := user.Find(find)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

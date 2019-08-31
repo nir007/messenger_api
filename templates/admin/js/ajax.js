@@ -20,13 +20,24 @@ function createUser() {
       "Content-Type":"application/json"
     },
     success: function (res) {
-
+      let userHtml = `<div class="card border-0 h-50 user-card">
+      <div class="card-body border-bottom">
+      <div class="row"><div class="col-auto">
+      <a class="thumbnail pull-left" href="#">
+      <img class="media-object rounded-circle" width=60 height=60 src="/static/admin/img/149071.png"></a>
+      </div><div class="col"><h4 class="media-heading">`+res.result.name+ ' ' +res.result.second+`</h4><p>
+      <span class="label label-info"></span>
+      <span class="label label-primary"></span></p></div></div>
+      </div></div>`;
+      
+      $('#users').prepend(userHtml);
     },
     error: function (res) {
-      alert('Error')
+      alert('Error');
     }
   }).done(function (res) {
-    console.log(res)
+    console.log(res);
+    $("#exampleModalCenter").modal("hide");
   })
 }
 

@@ -3,65 +3,109 @@ package application
 import (
 	"context"
 	"fmt"
+	"messenger/dto"
+	"strings"
 	"time"
 
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	_ "go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
-	"github.com/gin-gonic/gin"
-	"log"
-	"strings"
 )
 
+// Application struct for messeneger application
 type Application struct {
 	ID          primitive.ObjectID `json:"id" bson:"_id,omitempty"`
-	Name        string    `json:"name" binding:"required"`
-	Description string    `json:"description" binding:"required"`
-	Secret      string    `json:"secret"`
-	Domains     []string  `json:"domains" binding:"required"`
-	CreatedAt   time.Time `json:"createdAt"`
-	UpdatedAt   time.Time `json:"updatedAt"`
-	Managers    []string `json:"managers" binding:"required"`
+	Name        string             `json:"name" binding:"required,max=50,min=1"`
+	Description string             `json:"description" binding:"required,max=100,min=1"`
+	Secret      string             `json:"secret"`
+	Domains     []string           `json:"domains" binding:"required"`
+	CreatedAt   string             `json:"createdAt"`
+	UpdatedAt   string             `json:"updatedAt"`
+	Managers    []string           `json:"managers" binding:"required"`
 }
 
-func (a *Application) Insert(c *gin.Context) (*mongo.InsertOneResult, error) {
+// Delete deletes documents
+func (mc *Application) Delete() (int64, error) {
+	collection := client.Database("messenger").Collection("applications")
+	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
+	deleteResult, err := collection.DeleteOne(ctx, bson.M{"_id": mc.ID})
+
+	return deleteResult.DeletedCount, err
+}
+
+// Update updates documents
+func (mc *Application) Update() (int64, error) {
+	collection := client.Database("messenger").Collection("applications")
+	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
+
+	u1 := uuid.Must(uuid.NewV4(), nil)
+	mc.Secret = fmt.Sprintf("%s", u1)
+
+	updateResult, err := collection.UpdateOne(
+		ctx,
+		bson.M{"_id": mc.ID},
+		bson.M{"$set": bson.M{"secret": mc.Secret}},
+	)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return updateResult.ModifiedCount, err
+}
+
+//Insert creates new document
+func (mc *Application) Insert() (string, error) {
 	collection := client.Database("messenger").Collection("applications")
 
-	a.ID = primitive.NewObjectID()
-	a.CreatedAt = time.Now()
-	a.UpdatedAt = time.Now()
+	mc.ID = primitive.NewObjectID()
+	mc.CreatedAt = time.Now().String()
+	mc.UpdatedAt = ""
 	u1 := uuid.Must(uuid.NewV4(), nil)
-	a.Secret = fmt.Sprintf("%s", u1)
+	mc.Secret = fmt.Sprintf("%s", u1)
 
-	if managerId, ok := c.Get("managerId"); !ok {
-		return nil, fmt.Errorf("%s", "undefined manager id")
-	} else {
-		a.Managers = append(a.Managers, managerId.(string))
-		ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
-		res, err := collection.InsertOne(ctx, a)
+	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
+	res, err := collection.InsertOne(ctx, mc)
 
-		return res, err
+	if err != nil {
+		return "", err
 	}
+
+	return res.InsertedID.(string), err
 }
 
-func (a *Application) Find(c *gin.Context) ([]Application, error) {
-	result := make([]Application, 0)
+// FindOne finds one document
+func (mc *Application) FindOne(find dto.MongoParamsGetter) error {
+	collection := client.Database("messenger").Collection("applications")
+	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
+
+	return collection.FindOne(ctx, find.ToBson()).Decode(mc)
+}
+
+// Find finds several documents by pages
+func (mc *Application) Find(find dto.MongoParamsGetter) ([]interface{}, int64, error) {
+	result := make([]interface{}, 0)
 
 	collection := client.Database("messenger").Collection("applications")
 	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
 
-	filter := bson.M{}
-	if len(a.Name) > 0 {
-		filter["name"] = a.Name
+	filter := find.ToBson()
+	if len(mc.Name) > 0 {
+		filter["name"] = mc.Name
 	}
-	if len(a.Managers) > 0 {
-		filter["managers"] = strings.Join(a.Managers, ",")
+	if len(mc.Managers) > 0 {
+		filter["managers"] = strings.Join(mc.Managers, ",")
+	}
+
+	total, err := collection.CountDocuments(ctx, filter)
+	if err != nil {
+		return result, 0, err
 	}
 
 	cur, err := collection.Find(ctx, filter)
-	if err != nil { log.Fatal(err) }
+	if err != nil {
+		return make([]interface{}, 0), 0, err
+	}
 
 	defer cur.Close(ctx)
 
@@ -70,36 +114,9 @@ func (a *Application) Find(c *gin.Context) ([]Application, error) {
 		err := cur.Decode(app)
 		result = append(result, *app)
 		if err != nil {
-			log.Fatal(err)
+			return make([]interface{}, 0), 0, err
 		}
 	}
 
-	return result, err
-}
-
-func (a *Application) FindOne(c *gin.Context) error {
-	collection := client.Database("messenger").Collection("applications")
-	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
-
-	return collection.FindOne(ctx, bson.M{"_id": a.ID}).Decode(a)
-}
-
-func (a *Application) Update(c *gin.Context) (int64, error) {
-	collection := client.Database("messenger").Collection("applications")
-	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
-
-	u1 := uuid.Must(uuid.NewV4(), nil)
-	a.Secret = fmt.Sprintf("%s", u1)
-
-	updateResult, err := collection.UpdateOne(
-		ctx,
-		bson.M{"_id": a.ID},
-		bson.M{"$set": bson.M{"secret": a.Secret}},
-	)
-
-	if err != nil {
-		return 0, err
-	}
-
-	return updateResult.ModifiedCount, err
+	return result, total, nil
 }

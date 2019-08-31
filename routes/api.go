@@ -6,7 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func InitApi(r *gin.Engine) {
+//InitAPI adds routes for api
+func InitAPI(r *gin.Engine) {
 	r.POST("/registration", application.CreateManager)
 	r.GET("/confirm", application.CreateManager)
 	r.POST("/login", ginAuthJWT.LoginHandler)

@@ -1,16 +1,16 @@
 package application
 
 import (
-	"net/http"
 	"fmt"
-	"time"
 	"log"
+	"net/http"
+	"time"
 
+	jwt "github.com/appleboy/gin-jwt"
 	"github.com/gin-gonic/gin"
-	"github.com/appleboy/gin-jwt"
-	"golang.org/x/crypto/bcrypt"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func ApplcationAccess() gin.HandlerFunc {
@@ -33,16 +33,16 @@ func ApplcationAccess() gin.HandlerFunc {
 }
 
 type login struct {
-	Email string `form:"email" json:"email" binding:"required,email"`
+	Email    string `form:"email" json:"email" binding:"required,email"`
 	Password string `form:"password" json:"password" binding:"required"`
 }
 
 type AuthMiddleware struct {
-	Realm        string
-	Key          []byte
-	Timeout      time.Duration
-	MaxRefresh   time.Duration
-	IdentityKey  string
+	Realm       string
+	Key         []byte
+	Timeout     time.Duration
+	MaxRefresh  time.Duration
+	IdentityKey string
 }
 
 func (a *AuthMiddleware) GetAuthMiddleware() (*jwt.GinJWTMiddleware, error) {
@@ -56,7 +56,7 @@ func (a *AuthMiddleware) GetAuthMiddleware() (*jwt.GinJWTMiddleware, error) {
 			if v, ok := data.(Manager); ok {
 				return jwt.MapClaims{
 					a.IdentityKey: v.ID,
-					"email": v.Email,
+					"email":       v.Email,
 				}
 			}
 
@@ -72,7 +72,7 @@ func (a *AuthMiddleware) GetAuthMiddleware() (*jwt.GinJWTMiddleware, error) {
 			c.Set("managerId", claims[a.IdentityKey].(string))
 
 			return Manager{
-				ID: id,
+				ID:    id,
 				Email: claims["email"].(string),
 			}
 		},
@@ -87,8 +87,7 @@ func (a *AuthMiddleware) GetAuthMiddleware() (*jwt.GinJWTMiddleware, error) {
 			err = manager.FindOne(bson.M{"email": loginValues.Email})
 
 			if err := bcrypt.CompareHashAndPassword(
-				[]byte(manager.Password), []byte(loginValues.Password));
-				err == nil {
+				[]byte(manager.Password), []byte(loginValues.Password)); err == nil {
 				return manager, nil
 			}
 
@@ -115,9 +114,9 @@ func (a *AuthMiddleware) GetAuthMiddleware() (*jwt.GinJWTMiddleware, error) {
 			})
 		},
 
-		TokenLookup: "header: Authorization, query: token, cookie: gopa",
+		TokenLookup:   "header: Authorization, query: token, cookie: gopa",
 		TokenHeadName: "Bearer",
-		TimeFunc: time.Now,
+		TimeFunc:      time.Now,
 	})
 
 	if err != nil {

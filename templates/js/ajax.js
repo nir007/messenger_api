@@ -44,8 +44,8 @@ function login() {
     success: function (res) {
       let date = new Date();
       date.setTime(date.getTime() + (100 * 24*60*60*1000));
-      document.cookie = "gopa="+res.token + "; expires=" + date.toUTCString() + ';path=/';
-      document.cookie = "jwtExpire="+res.expire + "; expires=" + date.toUTCString() + ';path=/';
+      document.cookie = "gopa="+res.token + ";expires=" + date.toUTCString() + ';path=/';
+      document.cookie = "jwtExpire="+res.expire + ";expires=" + date.toUTCString() + ';path=/';
       location.href = '/admin/dashboard'
     },
     error: function (res) {
