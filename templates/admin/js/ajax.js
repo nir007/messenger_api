@@ -1,3 +1,10 @@
+var CreateMessageUserID = false;
+
+function setCreateMessageUserID(id) {
+  CreateMessageUserID = id;
+  $("#sendMessageModal").modal();
+}
+
 function createUser() {
   const form = $('#create_user_form');
 
@@ -43,7 +50,6 @@ function createUser() {
 
 function ajaxGetUsers(applicationId, beforeSend, success) {
   let params = beforeSend();
-  console.log(params);
   $.ajax({
     url: "/manage/users?applicationid=" + applicationId + "&page=" + params.page + "&perpage=" + params.perPage,
     method: "GET",
@@ -169,4 +175,53 @@ function logout() {
   deleteCookie('gopa');
   deleteCookie('jwtExpire');
   location.href = '/login'
+}
+
+
+function createMessage() {
+  const form = $('#send_message_form');
+
+  form.find('input').keyup(function (e) {
+    $(this).removeClass('is-invalid');
+  });
+
+  if (!CreateMessageUserID) {
+    alert("uid is undefined");
+    return;
+  }
+
+  const data = {
+    uid1: CreateMessageUserID,
+    uid2: form.find('input[name="uid2"]').val(),
+    text: form.find('textarea[name="text"]').val(),
+    applicationID: form.find('input[name="appId"]').val(),
+  };
+
+  if (data.uid2.length === 0) {
+    form.find('input[name="uid2"]').addClass('is-invalid');
+    return
+  }
+  if (data.text.length === 0) {
+    form.find('textarea[name="text"]').addClass('is-invalid');
+    return
+  }
+
+  $.ajax({
+    url: "/manage/messages",
+    method: "POST",
+    dataType: 'json',
+    data: JSON.stringify(data),
+    headers: {
+      "Content-Type":"application/json"
+    },
+    success: function (res) {
+      alert("message is sent");
+    },
+    error: function (res) {
+      alert('Error');
+    }
+  }).done(function (res) {
+    console.log(res);
+    $("#sendMessageModal").modal("hide");
+  })
 }

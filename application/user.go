@@ -30,7 +30,7 @@ type User struct {
 
 // Delete deletes documents
 func (mc *User) Delete() (int64, error) {
-	collection := client.Database("messenger").Collection("users_" + mc.ApplicationID)
+	collection := client.Database(dbName).Collection("users_" + mc.ApplicationID)
 	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
 	deleteResult, err := collection.DeleteOne(ctx, bson.M{"_id": mc.ID})
 
@@ -38,18 +38,19 @@ func (mc *User) Delete() (int64, error) {
 }
 
 // Update updates documents
-func (mc *User) Update() (int64, error) {
+func (mc *User) Update(find dto.SearchParamsGetter, update dto.BSONMaker) (int64, error) {
 	return 0, nil
 }
 
-//Insert  creates new document
+//Insert creates new document
 func (mc *User) Insert() (string, error) {
 	find := &dto.FindUsers{UID: mc.UID}
+
 	if err := mc.FindOne(find); err == nil {
-		return "", fmt.Errorf("user with id: %s already exists", mc.UID)
+		return "", fmt.Errorf("user with id: %s already exists", find.UID)
 	}
 
-	collection := client.Database("messenger").Collection("users_" + mc.ApplicationID)
+	collection := client.Database(dbName).Collection("users_" + mc.ApplicationID)
 	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
 
 	mc.ID = primitive.NewObjectID()
@@ -62,22 +63,22 @@ func (mc *User) Insert() (string, error) {
 		return "", err
 	}
 
-	return res.InsertedID.(string), err
+	return fmt.Sprintf("%v", res.InsertedID), err
 }
 
 // FindOne finds one document
-func (mc *User) FindOne(find dto.MongoParamsGetter) error {
-	collection := client.Database("messenger").Collection("users_" + mc.ApplicationID)
+func (mc *User) FindOne(find dto.SearchParamsGetter) error {
+	collection := client.Database(dbName).Collection("users_" + mc.ApplicationID)
 	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
 
 	return collection.FindOne(ctx, find.ToBson()).Decode(mc)
 }
 
 // Find finds several documents by pages
-func (mc *User) Find(find dto.MongoParamsGetter) ([]interface{}, int64, error) {
+func (mc *User) Find(find dto.SearchParamsGetter) ([]interface{}, int64, error) {
 	result := make([]interface{}, 0)
 
-	collection := client.Database("messenger").Collection("users_" + mc.ApplicationID)
+	collection := client.Database(dbName).Collection("users_" + mc.ApplicationID)
 	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
 
 	findBson := find.ToBson()

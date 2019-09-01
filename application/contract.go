@@ -7,11 +7,11 @@ type MongoDbManager interface {
 	// Delete deletes documents
 	Delete() (int64, error)
 	// Update updates documents
-	Update() (int64, error)
+	Update(find dto.SearchParamsGetter, update dto.BSONMaker) (int64, error)
 	//Insert  creates new document
 	Insert() (string, error)
 	// FindOne finds one document
-	FindOne(find dto.MongoParamsGetter) error
+	FindOne(find dto.SearchParamsGetter) error
 	// Find finds several documents by pages
-	Find(find dto.MongoParamsGetter) ([]interface{}, int64, error)
+	Find(find dto.SearchParamsGetter) ([]interface{}, int64, error)
 }

@@ -29,7 +29,7 @@ type Manager struct {
 
 // Delete deletes documents
 func (mc *Manager) Delete() (int64, error) {
-	collection := client.Database("messenger").Collection("managers")
+	collection := client.Database(dbName).Collection("managers")
 	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
 	deleteResult, err := collection.DeleteOne(ctx, bson.M{"_id": mc.ID})
 
@@ -37,7 +37,7 @@ func (mc *Manager) Delete() (int64, error) {
 }
 
 //Update changes document
-func (mc *Manager) Update() (int64, error) {
+func (mc *Manager) Update(find dto.SearchParamsGetter, update dto.BSONMaker) (int64, error) {
 	return 0, nil
 }
 
@@ -48,7 +48,7 @@ func (mc *Manager) Insert() (string, error) {
 		return "", errors.New("user already exists")
 	}
 
-	collection := client.Database("messenger").Collection("managers")
+	collection := client.Database(dbName).Collection("managers")
 
 	mc.ID = primitive.NewObjectID()
 	mc.CreatedAt = time.Now().String()
@@ -66,22 +66,24 @@ func (mc *Manager) Insert() (string, error) {
 		return "", err
 	}
 
-	return res.InsertedID.(string), err
+	return fmt.Sprintf("%v", res.InsertedID), err
 }
 
 // FindOne finds one document
-func (mc *Manager) FindOne(find dto.MongoParamsGetter) error {
-	collection := client.Database("messenger").Collection("managers")
+func (mc *Manager) FindOne(find dto.SearchParamsGetter) error {
+	collection := client.Database(dbName).Collection("managers")
 	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
+
+	fmt.Println(find.ToBson())
 
 	return collection.FindOne(ctx, find.ToBson()).Decode(mc)
 }
 
 // Find finds several documents by pages
-func (mc *Manager) Find(find dto.MongoParamsGetter) ([]interface{}, int64, error) {
+func (mc *Manager) Find(find dto.SearchParamsGetter) ([]interface{}, int64, error) {
 	result := make([]interface{}, 0)
 
-	collection := client.Database("messenger").Collection("managers")
+	collection := client.Database(dbName).Collection("managers")
 	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
 
 	total, err := collection.CountDocuments(ctx, find.ToBson())

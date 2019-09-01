@@ -26,7 +26,7 @@ type Application struct {
 
 // Delete deletes documents
 func (mc *Application) Delete() (int64, error) {
-	collection := client.Database("messenger").Collection("applications")
+	collection := client.Database(dbName).Collection("applications")
 	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
 	deleteResult, err := collection.DeleteOne(ctx, bson.M{"_id": mc.ID})
 
@@ -35,11 +35,12 @@ func (mc *Application) Delete() (int64, error) {
 
 // Update updates documents
 func (mc *Application) Update() (int64, error) {
-	collection := client.Database("messenger").Collection("applications")
+	collection := client.Database(dbName).Collection("applications")
 	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
 
 	u1 := uuid.Must(uuid.NewV4(), nil)
 	mc.Secret = fmt.Sprintf("%s", u1)
+	mc.UpdatedAt = time.Now().String()
 
 	updateResult, err := collection.UpdateOne(
 		ctx,
@@ -56,7 +57,7 @@ func (mc *Application) Update() (int64, error) {
 
 //Insert creates new document
 func (mc *Application) Insert() (string, error) {
-	collection := client.Database("messenger").Collection("applications")
+	collection := client.Database(dbName).Collection("applications")
 
 	mc.ID = primitive.NewObjectID()
 	mc.CreatedAt = time.Now().String()
@@ -71,22 +72,22 @@ func (mc *Application) Insert() (string, error) {
 		return "", err
 	}
 
-	return res.InsertedID.(string), err
+	return fmt.Sprintf("%v", res.InsertedID), err
 }
 
 // FindOne finds one document
-func (mc *Application) FindOne(find dto.MongoParamsGetter) error {
-	collection := client.Database("messenger").Collection("applications")
+func (mc *Application) FindOne(find dto.SearchParamsGetter) error {
+	collection := client.Database(dbName).Collection("applications")
 	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
 
 	return collection.FindOne(ctx, find.ToBson()).Decode(mc)
 }
 
 // Find finds several documents by pages
-func (mc *Application) Find(find dto.MongoParamsGetter) ([]interface{}, int64, error) {
+func (mc *Application) Find(find dto.SearchParamsGetter) ([]interface{}, int64, error) {
 	result := make([]interface{}, 0)
 
-	collection := client.Database("messenger").Collection("applications")
+	collection := client.Database(dbName).Collection("applications")
 	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
 
 	filter := find.ToBson()

@@ -3,6 +3,7 @@ package application
 import (
 	"context"
 	"errors"
+	"fmt"
 	"messenger/dto"
 	"time"
 
@@ -16,15 +17,15 @@ type Dialog struct {
 	UID1          string             `json:"uid1" binding:"required"`
 	UID2          string             `json:"uid2" binding:"required"`
 	LastMessage   string             `json:"lastMessage" binding:"required"`
-	CreatedAt     string             `json:"createdAt" binding:"-"`
-	UpdatedAt     string             `json:"updatedAt" binding:"-"`
 	ApplicationID string             `json:"applicationID" binding:"required"`
 	IsRed         bool               `json:"isRed" binding:"required"`
+	CreatedAt     string             `json:"createdAt" binding:"-"`
+	UpdatedAt     string             `json:"updatedAt" binding:"-"`
 }
 
 // Delete deletes documents
 func (mc *Dialog) Delete() (int64, error) {
-	collection := client.Database("messenger").Collection("dialogs_" + mc.ApplicationID)
+	collection := client.Database(dbName).Collection("dialogs_" + mc.ApplicationID)
 	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
 	deleteResult, err := collection.DeleteOne(ctx, bson.M{"_id": mc.ID})
 
@@ -32,63 +33,52 @@ func (mc *Dialog) Delete() (int64, error) {
 }
 
 // Update updates documents
-func (mc *Dialog) Update() (int64, error) {
-	return 0, nil
-}
-
-//Insert creates new document
-func (mc *Dialog) Insert() (string, error) {
-	find := &dto.FindUsers{ID: mc.ID}
-	if err := mc.FindOne(find); err == nil {
-		updatedRows, err := mc.updateLastMessage()
-
-		if err != nil || updatedRows == 0 {
-			return "", errors.New("updated rows: 0, " + err.Error())
-		}
-
-		return mc.ID.Hex(), nil
-	}
-
-	collection := client.Database("messenger").Collection("dialogs_" + mc.ApplicationID)
-
-	mc.ID = primitive.NewObjectID()
-	mc.CreatedAt = time.Now().String()
-	mc.UpdatedAt = ""
-
-	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
-	res, err := collection.InsertOne(ctx, mc)
-
-	return res.InsertedID.(string), err
-}
-
-// FindOne finds one document
-func (mc *Dialog) FindOne(find dto.MongoParamsGetter) error {
-	collection := client.Database("messenger").Collection("dialogs_" + mc.ApplicationID)
+func (mc *Dialog) Update(find dto.SearchParamsGetter, update dto.BSONMaker) (int64, error) {
+	collection := client.Database(dbName).Collection("dialogs_" + mc.ApplicationID)
 	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
 
-	err := collection.FindOne(ctx, find).Decode(mc)
-
-	return err
-}
-
-// Find finds several documents by pages
-func (mc *Dialog) Find(find dto.MongoParamsGetter) ([]interface{}, int64, error) {
-	return []interface{}{}, 0, nil
-}
-
-func (mc *Dialog) updateLastMessage() (int64, error) {
-	collection := client.Database("messenger").Collection("dialogs_" + mc.ApplicationID)
-	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
+	fmt.Println(find.ToBson())
+	fmt.Println(update.ToBson())
 
 	updateResult, err := collection.UpdateOne(
 		ctx,
-		bson.M{"_id": mc.ID},
-		bson.M{"$set": bson.M{"lastmessage": mc.LastMessage}},
+		find.ToBson(),
+		bson.M{"$set": update.ToBson()},
 	)
 
 	if err != nil {
 		return 0, err
 	}
 
-	return updateResult.ModifiedCount, err
+	if updateResult == nil || updateResult.ModifiedCount == 0 {
+		return 0, errors.New("undefined doalog")
+	}
+
+	return updateResult.ModifiedCount, nil
+}
+
+//Insert creates new document
+func (mc *Dialog) Insert() (string, error) {
+	collection := client.Database(dbName).Collection("dialogs_" + mc.ApplicationID)
+	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
+
+	mc.ID = primitive.NewObjectID()
+	mc.CreatedAt = time.Now().String()
+	mc.UpdatedAt = ""
+	_, err := collection.InsertOne(ctx, mc)
+
+	return mc.ID.Hex(), err
+}
+
+// FindOne finds one document
+func (mc *Dialog) FindOne(find dto.SearchParamsGetter) error {
+	collection := client.Database(dbName).Collection("dialogs_" + mc.ApplicationID)
+	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
+
+	return collection.FindOne(ctx, find).Decode(mc)
+}
+
+// Find finds several documents by pages
+func (mc *Dialog) Find(find dto.SearchParamsGetter) ([]interface{}, int64, error) {
+	return []interface{}{}, 0, nil
 }

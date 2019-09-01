@@ -1,8 +1,8 @@
 package routes
 
 import (
-	"messenger/application"
 	"messenger/config"
+	"messenger/middlewares"
 	"time"
 
 	jwt "github.com/appleboy/gin-jwt"
@@ -16,7 +16,7 @@ func init() {
 	duration := 10   //strconv.ParseInt(conf["timeout"].(string), 10, 64)
 	maxRefresh := 10 //strconv.ParseInt(conf["maxRefresh"].(string), 10, 64)
 
-	am := &application.AuthMiddleware{
+	am := &middlewares.AuthMiddleware{
 		Realm:       conf["realm"].(string),
 		Key:         []byte(conf["key"].(string)),
 		Timeout:     time.Hour * time.Duration(duration),

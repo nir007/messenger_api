@@ -1,49 +1,22 @@
 package dto
 
 import (
+	"fmt"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// MongoParamsGetter struct for getting params for searching
-type MongoParamsGetter interface {
-	ToBson() bson.M
-	Limit() *int64
-	Skip() *int64
-}
-
-// Pager for pagination
-type Pager struct {
-	Page    int64 `json:"page" form:"page" bson:"-"`
-	PerPage int64 `json:"perpage" form:"perpage" bson:"-"`
-}
-
-// Limit returns number items on one page
-func (f *Pager) Limit() *int64 {
-	if f.PerPage == 0 || f.PerPage > 100 || f.PerPage < 0 {
-		f.PerPage = 10
-	}
-	return &f.PerPage
-}
-
-// Skip returns number to skip documents
-func (f *Pager) Skip() *int64 {
-	skip := *f.Limit() * (f.Page - 1)
-
-	if skip < 0 {
-		skip = 0
-	}
-
-	return &skip
-}
-
 // FindApplications struct for searching applications
 type FindApplications struct {
-	Pager
-	ID        primitive.ObjectID `json:"id" binding:"required" bson:"_id,omitempty"`
-	Name      string             `json:"name" form:"name" bson:"name"`
-	Managers  []string           `json:"managers" form:"managers" bson:"managers"`
-	ManagerID string             `json:"managerId" form:"manager_id"`
+	MyBSON    `bson:"-"`
+	Page      `bson:"-"`
+	ID        primitive.ObjectID `json:"id" form:"id" bson:"_id,omitempty"`
+	Name      string             `json:"name" form:"name" bson:"name,omitempty"`
+	Secret    string             `json:"secret" form:"secret" bson:"secret,omitempty"`
+	Managers  []string           `json:"managers" form:"managers" bson:"managers,omitempty"`
+	ManagerID string             `json:"managerID" form:"managerid" bson:"-"`
+	Domains   []string           `json:"domains" bson:"domains,omitempty"`
 }
 
 // ToBson forms bson struct for searching documents
@@ -57,12 +30,14 @@ func (f *FindApplications) ToBson() bson.M {
 
 // FindUsers struct for finding users of application
 type FindUsers struct {
-	Pager
-	ID            primitive.ObjectID `json:"id" binding:"required" bson:"_id,omitempty"`
+	MyBSON        `bson:"-"`
+	Page          `bson:"-"`
+	ID            primitive.ObjectID `json:"id" bson:"_id,omitempty"`
 	UID           string             `json:"uid" form:"uid" bson:"uid,omitempty"`
 	Name          string             `json:"name" form:"name" bson:"name,omitempty"`
 	Second        string             `json:"second" form:"second" bson:"second,omitempty"`
-	ApplicationID string             `json:"applicationid" form:"applicationid" bson:"applicationid,omitempty"`
+	ApplicationID string             `json:"applicationId" form:"applicationid" bson:"applicationid,omitempty"`
+	BlackList     []string           `json:"blackList"`
 	Email         string             `json:"email" form:"email" bson:"email,omitempty"`
 	Phone         string             `json:"phone" form:"phone" bson:"phone,omitempty"`
 }
@@ -78,8 +53,9 @@ func (f *FindUsers) ToBson() bson.M {
 
 // FindManagers struct for finding users of application
 type FindManagers struct {
-	Pager
-	ID     primitive.ObjectID `json:"id" binding:"required" bson:"_id,omitempty"`
+	MyBSON `bson:"-"`
+	Page   `bson:"-"`
+	ID     primitive.ObjectID `json:"id" bson:"_id,omitempty"`
 	Name   string             `json:"name" form:"name" bson:"name,omitempty"`
 	Second string             `json:"second" form:"second" bson:"second,omitempty"`
 	Email  string             `json:"email" form:"email" bson:"email,omitempty"`
@@ -92,5 +68,47 @@ func (f *FindManagers) ToBson() bson.M {
 	var dataM bson.M
 	_ = bson.Unmarshal(b, &dataM)
 
+	return dataM
+}
+
+// FindDialogs struct for finding dialogs of application
+type FindDialogs struct {
+	MyBSON        `bson:"-"`
+	Page          `bson:"-"`
+	ID            primitive.ObjectID `json:"id" bson:"_id,omitempty"`
+	LastMessage   string             `json:"lastMessage" form:"lastMessage" bson:"lastmessage,omitempty"`
+	ApplicationID string             `json:"applicationID" form:"applicationID" binding:"required" bson:"applicationid,omitempty"`
+	UID1          string             `json:"uid1" form:"uid1" bson:"uid1,omitempty"`
+	UID2          string             `json:"uid2" form:"uid2" bson:"uid2,omitempty"`
+	Text          string             `json:"text" form:"text" bson:"text,omitempty"`
+	IsRed         bool               `json:"isRed" form:"isRed" bson:"isred,omitempty"`
+}
+
+// ToBson forms bson struct for searching documents
+func (f *FindDialogs) ToBson() bson.M {
+	b, _ := bson.Marshal(f)
+	var dataM bson.M
+	_ = bson.Unmarshal(b, &dataM)
+
+	uid1, ok1 := dataM["uid1"]
+	uid2, ok2 := dataM["uid2"]
+
+	fmt.Println("dataM:", dataM)
+
+	if ok1 && ok2 {
+		delete(dataM, "uid1")
+		delete(dataM, "uid2")
+		dataM["$or"] = []bson.M{
+			bson.M{
+				"uid1": uid1,
+				"uid2": uid2,
+			},
+			bson.M{
+				"uid1": uid2,
+				"uid2": uid1,
+			},
+		}
+	}
+	fmt.Println("dataM:", dataM)
 	return dataM
 }

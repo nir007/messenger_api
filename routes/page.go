@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"fmt"
 	"html/template"
 	"messenger/application"
 	"messenger/dto"
@@ -69,13 +70,17 @@ func InitPages(r *gin.Engine) {
 		})
 		admin.GET("/application/:id", func(c *gin.Context) {
 			id := c.Param("id")
+			managerID, ok := c.Get("managerID")
 
 			objID, _ := primitive.ObjectIDFromHex(id)
-			find := &dto.FindApplications{ID: objID}
+			find := &dto.FindApplications{
+				ID:       objID,
+				Managers: []string{fmt.Sprintf("%v", managerID)},
+			}
 			app := &application.Application{}
 			err := app.FindOne(find)
 
-			if err != nil {
+			if err != nil || !ok {
 				buildErrorPage(c, r, err)
 				return
 			}
