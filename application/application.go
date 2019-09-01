@@ -45,7 +45,7 @@ func (mc *Application) Update() (int64, error) {
 	updateResult, err := collection.UpdateOne(
 		ctx,
 		bson.M{"_id": mc.ID},
-		bson.M{"$set": bson.M{"secret": mc.Secret}},
+		bson.M{"$set": bson.M{"secret": mc.Secret, "updatedat": mc.UpdatedAt}},
 	)
 
 	if err != nil {

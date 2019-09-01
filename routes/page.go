@@ -97,6 +97,27 @@ func InitPages(r *gin.Engine) {
 				"domains":     strings.Join(app.Domains, ","),
 			})
 		})
+		admin.GET("/profile/", func(c *gin.Context) {
+			managerID, _ := c.Get("managerID")
+
+			objID, _ := primitive.ObjectIDFromHex(fmt.Sprintf("%v", managerID))
+			find := &dto.FindManagers{ID: objID}
+
+			manager := &application.Manager{}
+			err := manager.FindOne(find)
+
+			if err != nil {
+				buildErrorPage(c, r, err)
+				return
+			}
+
+			ct := "templates/admin/profile.html"
+			buildAdminPages(c, r, ct, gin.H{
+				"Name":      manager.Name,
+				"Second":    manager.SecondName,
+				"CreatedAt": manager.CreatedAt,
+			})
+		})
 	}
 }
 
