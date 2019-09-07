@@ -2,6 +2,7 @@ package main
 
 import (
 	"messenger/routes"
+	"os"
 
 	"github.com/gin-gonic/gin"
 )
@@ -11,6 +12,13 @@ func main() {
 
 	routes.InitAPI(r)
 	routes.InitPages(r)
+	routes.InitREST(r)
 
-	r.Run(":8082") // listen and serve on 0.0.0.0:8080
+	port := os.Getenv("PORT")
+
+	if len(port) == 0 {
+		port = ":8081"
+	}
+
+	r.Run(port) // listen and serve on 0.0.0.0:8080
 }

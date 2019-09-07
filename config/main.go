@@ -2,7 +2,6 @@ package config
 
 import (
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -69,7 +68,4 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-
-	fmt.Println("CONFIGS: ", conf)
-
 }

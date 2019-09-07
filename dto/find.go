@@ -1,8 +1,6 @@
 package dto
 
 import (
-	"fmt"
-
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -93,8 +91,6 @@ func (f *FindDialogs) ToBson() bson.M {
 	uid1, ok1 := dataM["uid1"]
 	uid2, ok2 := dataM["uid2"]
 
-	fmt.Println("dataM:", dataM)
-
 	if ok1 && ok2 {
 		delete(dataM, "uid1")
 		delete(dataM, "uid2")
@@ -109,6 +105,5 @@ func (f *FindDialogs) ToBson() bson.M {
 			},
 		}
 	}
-	fmt.Println("dataM:", dataM)
 	return dataM
 }

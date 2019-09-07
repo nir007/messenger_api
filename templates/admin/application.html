@@ -29,8 +29,9 @@
                 <div class="form-group">
                   <label for="InputName">Secret Key</label>
                   <div class="input-group mb-3">
-                    <input name="secret" type="text" disabled class="form-control" value="{{.secret}}" title="Use for API requests">
+                    <input id="copySecret" name="secret" type="text" disabled class="form-control" value="{{.secret}}" title="Use for API requests">
                     <div class="input-group-append">
+                      <button onclick="MyCopy('copySecret')" class="btn btn-primary" type="button">Copy</button>
                       <button onclick="refreshSecretKey('{{.appId}}')" class="btn btn-success" type="button">Refresh</button>
                     </div>
                   </div>
@@ -192,10 +193,9 @@
         </a>
         </div>
         <div class="col-md-7">
-        <h4 class="media-heading">`+ users[i].name + ` ` + users[i].second +`</h4>
-        <p><span class="label label-info">`+ users[i].email + `</span>
+        <h5 class="media-heading">`+ users[i].name + ` ` + users[i].second +` `+ users[i].email + `</h5>
         <span class="label label-primary">`+ users[i].phone + `</span>
-        <span class="label label-primary"><b>id:</b> `+ users[i].id + `</span>
+        <p><span class="label label-primary"><b>id:</b> `+ users[i].id + `</span></p>
         <span class="label label-primary"><b>uid:</b> `+ users[i].uid + `</span></p>
         </div>
         <div class="col">

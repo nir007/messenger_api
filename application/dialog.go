@@ -3,7 +3,6 @@ package application
 import (
 	"context"
 	"errors"
-	"fmt"
 	"messenger/dto"
 	"time"
 
@@ -37,9 +36,6 @@ func (mc *Dialog) Update(find dto.SearchParamsGetter, update dto.BSONMaker) (int
 	collection := client.Database(dbName).Collection("dialogs_" + mc.ApplicationID)
 	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
 
-	fmt.Println(find.ToBson())
-	fmt.Println(update.ToBson())
-
 	updateResult, err := collection.UpdateOne(
 		ctx,
 		find.ToBson(),
@@ -54,6 +50,7 @@ func (mc *Dialog) Update(find dto.SearchParamsGetter, update dto.BSONMaker) (int
 		return 0, errors.New("undefined doalog")
 	}
 
+	_ = mc.FindOne(find)
 	return updateResult.ModifiedCount, nil
 }
 

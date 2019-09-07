@@ -1,7 +1,6 @@
 package middlewares
 
 import (
-	"fmt"
 	"log"
 	"messenger/application"
 	"messenger/dto"
@@ -48,8 +47,6 @@ func (a *AuthMiddleware) GetAuthMiddleware() (*jwt.GinJWTMiddleware, error) {
 		},
 		IdentityHandler: func(c *gin.Context) interface{} {
 			claims := jwt.ExtractClaims(c)
-
-			fmt.Println("claims[a.IdentityKey]: ", claims[a.IdentityKey])
 
 			id, _ := primitive.ObjectIDFromHex(claims[a.IdentityKey].(string))
 

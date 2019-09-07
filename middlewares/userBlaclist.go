@@ -1,6 +1,10 @@
 package middlewares
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"messenger/application"
 	"messenger/dto"
 	"net/http"
@@ -11,9 +15,17 @@ import (
 // Blacklist check access to send a message
 func Blacklist(c *gin.Context) {
 	message := &application.Message{}
-	context := c.Copy()
 
-	err := context.ShouldBind(message)
+	var bodyBytes []byte
+	if c.Request.Body != nil {
+		bodyBytes, _ = ioutil.ReadAll(c.Request.Body)
+	}
+
+	c.Request.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+
+	err := json.Unmarshal(bodyBytes, message)
+
+	fmt.Println(message)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

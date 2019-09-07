@@ -32,7 +32,7 @@ function createUser() {
       <div class="row"><div class="col-auto">
       <a class="thumbnail pull-left" href="#">
       <img class="media-object rounded-circle" width=60 height=60 src="/static/admin/img/149071.png"></a>
-      </div><div class="col"><h4 class="media-heading">`+res.result.name+ ' ' +res.result.second+`</h4><p>
+      </div><div class="col"><h5 class="media-heading">`+res.result.name+ ' ' +res.result.second+`</h5><p>
       <span class="label label-info"></span>
       <span class="label label-primary"></span></p></div></div>
       </div></div>`;
@@ -224,4 +224,20 @@ function createMessage() {
     console.log(res);
     $("#sendMessageModal").modal("hide");
   })
+}
+
+function MyCopy(id) {
+  /* Get the text field */
+  var copyText = document.getElementById(id);
+  copyText.removeAttribute('disabled');
+
+  /* Select the text field */
+  copyText.select();
+  copyText.setSelectionRange(0, 99999); /*For mobile devices*/
+
+  /* Copy the text inside the text field */
+  document.execCommand("copy");
+
+  var copyText = document.getElementById(id);
+  copyText.setAttribute('disabled', true);
 }

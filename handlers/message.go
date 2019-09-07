@@ -19,6 +19,7 @@ func CreateMessage(c *gin.Context) {
 		return
 	}
 
+	message.ApplicationID = c.Request.Header["Application-Id"][0]
 	_, err = message.Insert()
 
 	if err != nil {

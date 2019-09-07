@@ -13,7 +13,7 @@ import (
 // ApplicationAccess check access to api functions
 func ApplicationAccess(c *gin.Context) {
 	secretKey := c.Request.Header["Secret-Key"]
-	applicationID := c.Request.Header["Application-ID"]
+	applicationID := c.Request.Header["Application-Id"]
 
 	if len(secretKey) != 1 || len(applicationID) != 1 {
 		c.JSON(

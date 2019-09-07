@@ -18,7 +18,7 @@ type Message struct {
 	UID2          string             `json:"uid2" binding:"required"`
 	Text          string             `json:"text" binding:"required"`
 	IsRed         bool               `json:"isRed"`
-	ApplicationID string             `json:"applicationID" binding:"required"`
+	ApplicationID string             `json:"applicationId"`
 	CreatedAt     string             `json:"createdAt" binding:"-"`
 	UpdatedAt     string             `json:"updatedAt" binding:"-"`
 }
@@ -67,10 +67,8 @@ func (mc *Message) Insert() (string, error) {
 		UpdatedAt:   time.Now().String(),
 	}
 
-	var dialogID string
-
-	if _, err := dialog.Update(findDialog, updateDialog); err != nil {
-		dialogID, err = dialog.Insert()
+	if _, err = dialog.Update(findDialog, updateDialog); err != nil {
+		_, err = dialog.Insert()
 		if err != nil {
 			return "", err
 		}
@@ -80,7 +78,7 @@ func (mc *Message) Insert() (string, error) {
 	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
 
 	mc.ID = primitive.NewObjectID()
-	mc.DialogID = dialogID
+	mc.DialogID = dialog.ID.Hex()
 	mc.CreatedAt = time.Now().String()
 	mc.UpdatedAt = ""
 
