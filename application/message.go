@@ -3,11 +3,13 @@ package application
 import (
 	"context"
 	"errors"
+	"fmt"
 	"messenger/dto"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 // Message struct
@@ -17,6 +19,7 @@ type Message struct {
 	UID1          string             `json:"uid1" binding:"required"`
 	UID2          string             `json:"uid2" binding:"required"`
 	Text          string             `json:"text" binding:"required"`
+	Images        []string           `json:"images", binding:"-"`
 	IsRed         bool               `json:"isRed"`
 	ApplicationID string             `json:"applicationId"`
 	CreatedAt     string             `json:"createdAt" binding:"-"`
@@ -98,5 +101,35 @@ func (mc *Message) FindOne(find dto.SearchParamsGetter) error {
 
 // Find finds several documents
 func (mc *Message) Find(find dto.SearchParamsGetter) ([]interface{}, int64, error) {
-	return []interface{}{}, 0, nil
+	result := make([]interface{}, 0)
+
+	fmt.Println("find.ToBson(): ", find.ToBson())
+
+	collection := client.Database(dbName).Collection("messages_" + mc.ApplicationID)
+	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
+
+	options := &options.FindOptions{Skip: find.Skip(), Limit: find.Limit(), Sort: find.Sort()}
+
+	total, err := collection.CountDocuments(ctx, find.ToBson())
+	if err != nil {
+		return result, 0, err
+	}
+
+	cur, err := collection.Find(ctx, find.ToBson(), options)
+	if err != nil {
+		return make([]interface{}, 0), 0, err
+	}
+
+	defer cur.Close(ctx)
+
+	for cur.Next(ctx) {
+		app := &Message{}
+		err := cur.Decode(app)
+		result = append(result, *app)
+		if err != nil {
+			return make([]interface{}, 0), 0, err
+		}
+	}
+
+	return result, total, nil
 }

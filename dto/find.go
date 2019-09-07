@@ -19,6 +19,10 @@ type FindApplications struct {
 
 // ToBson forms bson struct for searching documents
 func (f *FindApplications) ToBson() bson.M {
+	/*if len(mc.Managers) > 0 {
+		filter["managers"] = strings.Join(mc.Managers, ",")
+	}*/
+
 	b, _ := bson.Marshal(f)
 	var dataM bson.M
 	_ = bson.Unmarshal(b, &dataM)
@@ -75,15 +79,53 @@ type FindDialogs struct {
 	Page          `bson:"-"`
 	ID            primitive.ObjectID `json:"id" bson:"_id,omitempty"`
 	LastMessage   string             `json:"lastMessage" form:"lastMessage" bson:"lastmessage,omitempty"`
-	ApplicationID string             `json:"applicationID" form:"applicationID" binding:"required" bson:"applicationid,omitempty"`
+	ApplicationID string             `json:"applicationID" form:"applicationID" bson:"applicationid,omitempty"`
 	UID1          string             `json:"uid1" form:"uid1" bson:"uid1,omitempty"`
 	UID2          string             `json:"uid2" form:"uid2" bson:"uid2,omitempty"`
-	Text          string             `json:"text" form:"text" bson:"text,omitempty"`
 	IsRed         bool               `json:"isRed" form:"isRed" bson:"isred,omitempty"`
 }
 
 // ToBson forms bson struct for searching documents
 func (f *FindDialogs) ToBson() bson.M {
+	b, _ := bson.Marshal(f)
+	var dataM bson.M
+	_ = bson.Unmarshal(b, &dataM)
+
+	uid1, ok1 := dataM["uid1"]
+	uid2, ok2 := dataM["uid2"]
+
+	if ok1 && ok2 {
+		delete(dataM, "uid1")
+		delete(dataM, "uid2")
+		dataM["$or"] = []bson.M{
+			bson.M{
+				"uid1": uid1,
+				"uid2": uid2,
+			},
+			bson.M{
+				"uid1": uid2,
+				"uid2": uid1,
+			},
+		}
+	}
+	return dataM
+}
+
+// FindMessages struct for searching messages of dialog
+type FindMessages struct {
+	MyBSON        `bson:"-"`
+	Page          `bson:"-"`
+	ID            primitive.ObjectID `json:"id" bson:"_id,omitempty"`
+	Text          string             `json:"text" form:"text" bson:"text,omitempty"`
+	DialogID      string             `json:"dialogID" form:"dialogID" bson:"dialogid,omitempty"`
+	ApplicationID string             `json:"applicationID" form:"applicationID" bson:"applicationid,omitempty"`
+	UID1          string             `json:"uid1" form:"uid1" bson:"uid1,omitempty"`
+	UID2          string             `json:"uid2" form:"uid2" bson:"uid2,omitempty"`
+	IsRed         bool               `json:"isRed" form:"isRed" bson:"isred,omitempty"`
+}
+
+// ToBson forms bson struct for searching documents
+func (f *FindMessages) ToBson() bson.M {
 	b, _ := bson.Marshal(f)
 	var dataM bson.M
 	_ = bson.Unmarshal(b, &dataM)

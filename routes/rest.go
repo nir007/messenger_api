@@ -15,6 +15,6 @@ func InitREST(r *gin.Engine) {
 	v1.Use(middlewares.ApplicationAccess)
 
 	v1.POST("/messages/", middlewares.Blacklist, handlers.CreateMessage)
-	v1.GET("/messages/", handlers.FindAllMessages)
-	v1.GET("/dialogs/", handlers.FindAllDialogs)
+	v1.GET("/messages/:dialogid", handlers.FindAllMessages)
+	v1.GET("/dialogs/:uid", handlers.FindAllDialogs)
 }

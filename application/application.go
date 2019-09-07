@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 	"messenger/dto"
-	"strings"
 	"time"
 
 	uuid "github.com/satori/go.uuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 // Application struct for messeneger application
@@ -90,20 +90,14 @@ func (mc *Application) Find(find dto.SearchParamsGetter) ([]interface{}, int64, 
 	collection := client.Database(dbName).Collection("applications")
 	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
 
-	filter := find.ToBson()
-	if len(mc.Name) > 0 {
-		filter["name"] = mc.Name
-	}
-	if len(mc.Managers) > 0 {
-		filter["managers"] = strings.Join(mc.Managers, ",")
-	}
+	options := &options.FindOptions{Skip: find.Skip(), Limit: find.Limit(), Sort: find.Sort()}
 
-	total, err := collection.CountDocuments(ctx, filter)
+	total, err := collection.CountDocuments(ctx, find.ToBson())
 	if err != nil {
 		return result, 0, err
 	}
 
-	cur, err := collection.Find(ctx, filter)
+	cur, err := collection.Find(ctx, find.ToBson(), options)
 	if err != nil {
 		return make([]interface{}, 0), 0, err
 	}

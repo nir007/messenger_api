@@ -11,16 +11,20 @@ import (
 // FindAllDialogs handles http request
 func FindAllDialogs(c *gin.Context) {
 	find := &dto.FindDialogs{}
-	err := c.ShouldBind(find)
 
+	err := c.ShouldBind(find)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		c.Abort()
 		return
 	}
 
-	dialog := &application.Dialog{ApplicationID: find.ApplicationID}
+	if uid := c.Param("uid"); len(uid) > 0 {
+		find.UID1 = uid
+		find.ApplicationID = c.Request.Header["Application-Id"][0]
+	}
 
+	dialog := &application.Dialog{ApplicationID: find.ApplicationID}
 	dialogs, total, err := dialog.Find(find)
 
 	if err != nil {

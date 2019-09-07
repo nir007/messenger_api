@@ -10,6 +10,7 @@ import (
 	uuid "github.com/satori/go.uuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -86,12 +87,13 @@ func (mc *Manager) Find(find dto.SearchParamsGetter) ([]interface{}, int64, erro
 	collection := client.Database(dbName).Collection("managers")
 	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
 
+	options := &options.FindOptions{Skip: find.Skip(), Limit: find.Limit(), Sort: find.Sort()}
 	total, err := collection.CountDocuments(ctx, find.ToBson())
 	if err != nil {
 		return result, 0, err
 	}
 
-	cur, err := collection.Find(ctx, find.ToBson())
+	cur, err := collection.Find(ctx, find.ToBson(), options)
 	if err != nil {
 		return make([]interface{}, 0), 0, err
 	}

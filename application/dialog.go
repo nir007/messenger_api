@@ -8,6 +8,7 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 // Dialog struct for dialogs
@@ -77,5 +78,33 @@ func (mc *Dialog) FindOne(find dto.SearchParamsGetter) error {
 
 // Find finds several documents by pages
 func (mc *Dialog) Find(find dto.SearchParamsGetter) ([]interface{}, int64, error) {
-	return []interface{}{}, 0, nil
+	result := make([]interface{}, 0)
+
+	collection := client.Database(dbName).Collection("dialogs_" + mc.ApplicationID)
+	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
+
+	options := &options.FindOptions{Skip: find.Skip(), Limit: find.Limit(), Sort: find.Sort()}
+
+	total, err := collection.CountDocuments(ctx, find.ToBson())
+	if err != nil {
+		return result, 0, err
+	}
+
+	cur, err := collection.Find(ctx, find.ToBson(), options)
+	if err != nil {
+		return make([]interface{}, 0), 0, err
+	}
+
+	defer cur.Close(ctx)
+
+	for cur.Next(ctx) {
+		app := &Dialog{}
+		err := cur.Decode(app)
+		result = append(result, *app)
+		if err != nil {
+			return make([]interface{}, 0), 0, err
+		}
+	}
+
+	return result, total, nil
 }

@@ -82,14 +82,14 @@ func (mc *User) Find(find dto.SearchParamsGetter) ([]interface{}, int64, error) 
 	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
 
 	findBson := find.ToBson()
-	params := &options.FindOptions{Skip: find.Skip(), Limit: find.Limit()}
+	options := &options.FindOptions{Skip: find.Skip(), Limit: find.Limit(), Sort: find.Sort()}
 
 	total, err := collection.CountDocuments(ctx, findBson)
 	if err != nil {
 		return result, 0, err
 	}
 
-	cur, err := collection.Find(ctx, findBson, params)
+	cur, err := collection.Find(ctx, findBson, options)
 	if err != nil {
 		return result, 0, err
 	}

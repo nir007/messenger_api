@@ -29,12 +29,15 @@ func (f *MyBSON) ToBson() bson.M {
 type Pager interface {
 	Limit() *int64
 	Skip() *int64
+	Sort() bson.M
 }
 
 // Page for pagination
 type Page struct {
-	Page    int64 `json:"page" form:"page" bson:"-"`
-	PerPage int64 `json:"perpage" form:"perpage" bson:"-"`
+	Page      int64  `json:"page" form:"page" bson:"-"`
+	PerPage   int64  `json:"perpage" form:"perpage" bson:"-"`
+	SortField string `json:"sort" form:"sort" bson:"-"`
+	SortOrder string `json:"order" form:"order" bson:"-"`
 }
 
 // Limit returns number items on one page
@@ -54,4 +57,18 @@ func (f *Page) Skip() *int64 {
 	}
 
 	return &skip
+}
+
+// Sort return options for sorting
+func (f *Page) Sort() bson.M {
+	if len(f.SortField) == 0 || (f.SortOrder != "asc" && f.SortOrder != "desc") {
+		return bson.M{"createdat": -1}
+	}
+
+	orders := map[string]int{
+		"asc":  1,
+		"desc": -1,
+	}
+
+	return bson.M{f.SortField: orders[f.SortOrder]}
 }
