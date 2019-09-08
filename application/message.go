@@ -12,6 +12,16 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+// MessageFile struct
+type MessageFile struct {
+	URL        string `json:"url"`
+	PreviewURL string `json:"previewUrl"`
+	Type       string `json:"type"`
+	Width      int    `json:"width"`
+	Height     int    `json:"height"`
+	Weight     int    `json:"weight"`
+}
+
 // Message struct
 type Message struct {
 	ID            primitive.ObjectID `json:"id" bson:"_id,omitempty"`
@@ -19,7 +29,7 @@ type Message struct {
 	UID1          string             `json:"uid1" binding:"required"`
 	UID2          string             `json:"uid2" binding:"required"`
 	Text          string             `json:"text" binding:"required"`
-	Images        []string           `json:"images", binding:"-"`
+	Files         []MessageFile      `json:"files", binding:"-"`
 	IsRed         bool               `json:"isRed"`
 	ApplicationID string             `json:"applicationId"`
 	CreatedAt     string             `json:"createdAt" binding:"-"`

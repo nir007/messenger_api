@@ -10,12 +10,68 @@
   version = "v2.6.2"
 
 [[projects]]
+  digest = "1:ee04ad245d72738ffd8d5e195ebe0dce41d342da5842f9bb503f423a87e09c4c"
+  name = "github.com/aws/aws-sdk-go"
+  packages = [
+    "aws",
+    "aws/awserr",
+    "aws/awsutil",
+    "aws/client",
+    "aws/client/metadata",
+    "aws/corehandlers",
+    "aws/credentials",
+    "aws/credentials/ec2rolecreds",
+    "aws/credentials/endpointcreds",
+    "aws/credentials/processcreds",
+    "aws/credentials/stscreds",
+    "aws/csm",
+    "aws/defaults",
+    "aws/ec2metadata",
+    "aws/endpoints",
+    "aws/request",
+    "aws/session",
+    "aws/signer/v4",
+    "internal/ini",
+    "internal/s3err",
+    "internal/sdkio",
+    "internal/sdkmath",
+    "internal/sdkrand",
+    "internal/sdkuri",
+    "internal/shareddefaults",
+    "private/protocol",
+    "private/protocol/eventstream",
+    "private/protocol/eventstream/eventstreamapi",
+    "private/protocol/json/jsonutil",
+    "private/protocol/query",
+    "private/protocol/query/queryutil",
+    "private/protocol/rest",
+    "private/protocol/restxml",
+    "private/protocol/xml/xmlutil",
+    "service/s3",
+    "service/s3/s3iface",
+    "service/s3/s3manager",
+    "service/sts",
+    "service/sts/stsiface"
+  ]
+  pruneopts = "UT"
+  revision = "cf5210b77b6f9d40c4c34a0bc793f3bdbe4bc877"
+  version = "v1.23.17"
+
+[[projects]]
   digest = "1:76dc72490af7174349349838f2fe118996381b31ea83243812a97e5a0fd5ed55"
   name = "github.com/dgrijalva/jwt-go"
   packages = ["."]
   pruneopts = "UT"
   revision = "06ea1031745cb8b3dab3f6a236daf2b0aa468b7e"
   version = "v3.2.0"
+
+[[projects]]
+  digest = "1:80154261f3a8bd25b0c4f229fa007ebe8f1fef3b7be9363512b0e72b1543ce70"
+  name = "github.com/disintegration/imaging"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "9aab30e6aa535fe3337b489b76759ef97dfaf362"
+  version = "v1.6.1"
 
 [[projects]]
   digest = "1:cc93dd54278f6c0dd4b43588b3cf2c07b09b2a6dd4e2617edf81aa8946054c1e"
@@ -69,6 +125,21 @@
   packages = ["."]
   pruneopts = "UT"
   revision = "2a8bb927dd31d8daada140a5d09578521ce5c36a"
+
+[[projects]]
+  digest = "1:582b704bebaa06b48c29b0cec224a6058a09c86883aaddabde889cd1a5f73e1b"
+  name = "github.com/google/uuid"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "0cd6bf5da1e1c83f8b45653022c74f71af0538a4"
+  version = "v1.1.1"
+
+[[projects]]
+  digest = "1:bb81097a5b62634f3e9fec1014657855610c82d19b9a40c17612e32651e35dca"
+  name = "github.com/jmespath/go-jmespath"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "c2b33e84"
 
 [[projects]]
   digest = "1:709cd2a2c29cc9b89732f6c24846bbb9d6270f28ef5ef2128cc73bd0d6d7bff9"
@@ -185,6 +256,19 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:ef77645ded0a78c2290284da2be0e5854dd8aea1e853abb3a29898bcaa66cfa7"
+  name = "golang.org/x/image"
+  packages = [
+    "bmp",
+    "ccitt",
+    "tiff",
+    "tiff/lzw"
+  ]
+  pruneopts = "UT"
+  revision = "cb417be4ba39d22a85fafbeeb47bb89396d4d7b4"
+
+[[projects]]
+  branch = "master"
   digest = "1:382bb5a7fb4034db3b6a2d19e5a4a6bcf52f4750530603c01ca18a172fa3089b"
   name = "golang.org/x/sync"
   packages = ["semaphore"]
@@ -235,8 +319,13 @@
   analyzer-version = 1
   input-imports = [
     "github.com/appleboy/gin-jwt",
+    "github.com/aws/aws-sdk-go/aws",
+    "github.com/aws/aws-sdk-go/aws/session",
+    "github.com/aws/aws-sdk-go/service/s3/s3manager",
+    "github.com/disintegration/imaging",
     "github.com/gin-contrib/cors",
     "github.com/gin-gonic/gin",
+    "github.com/google/uuid",
     "github.com/satori/go.uuid",
     "go.mongodb.org/mongo-driver/bson",
     "go.mongodb.org/mongo-driver/bson/primitive",

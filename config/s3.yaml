@@ -1,0 +1,3 @@
+bucket: "messenger"
+endpoint: "storage.yandexcloud.net"
+region: "us-east-1"
