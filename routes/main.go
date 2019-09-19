@@ -6,6 +6,8 @@ import (
 	"time"
 
 	jwt "github.com/appleboy/gin-jwt"
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 )
 
 var ginAuthJWT *jwt.GinJWTMiddleware
@@ -24,4 +26,12 @@ func init() {
 		IdentityKey: conf["identityKey"].(string),
 	}
 	ginAuthJWT, _ = am.GetAuthMiddleware()
+}
+
+// CORS returns cors policy handler
+func CORS() gin.HandlerFunc {
+	config := cors.DefaultConfig()
+	config.AllowOrigins = []string{"http://localhost:8082"}
+
+	return cors.New(config)
 }

@@ -4,7 +4,6 @@ import (
 	"log"
 	"messenger/application"
 	"messenger/dto"
-	"net/http"
 	"time"
 
 	jwt "github.com/appleboy/gin-jwt"
@@ -84,18 +83,13 @@ func (a *AuthMiddleware) GetAuthMiddleware() (*jwt.GinJWTMiddleware, error) {
 			return false
 		},
 		Unauthorized: func(c *gin.Context, code int, message string) {
-			if c.ContentType() != "application/json" {
-				c.Redirect(http.StatusMovedPermanently, "/login?m=send_auth_token")
-				return
-			}
-
 			c.JSON(code, gin.H{
 				"code":    code,
 				"message": message,
 			})
 		},
 
-		TokenLookup:   "header: Authorization, query: token, cookie: gopa",
+		TokenLookup:   "header: Authorization, query: token, cookie: token",
 		TokenHeadName: "Bearer",
 		TimeFunc:      time.Now,
 	})

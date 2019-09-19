@@ -10,8 +10,9 @@ import (
 func main() {
 	r := gin.Default()
 
-	routes.InitAPI(r)
-	routes.InitPages(r)
+	r.Use(routes.CORS())
+
+	routes.InitSite(r)
 	routes.InitREST(r)
 
 	port := os.Getenv("PORT")
