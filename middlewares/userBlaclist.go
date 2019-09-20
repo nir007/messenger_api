@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"messenger/application"
+	"messenger/drepository"
 	"messenger/dto"
 	"net/http"
 
@@ -14,7 +14,7 @@ import (
 
 // Blacklist check access to send a message
 func Blacklist(c *gin.Context) {
-	message := &application.Message{}
+	message := &drepository.Message{}
 
 	var bodyBytes []byte
 	if c.Request.Body != nil {
@@ -44,7 +44,7 @@ func Blacklist(c *gin.Context) {
 		BlackList: []string{message.UID1},
 	}
 
-	user := application.User{ApplicationID: message.ApplicationID}
+	user := drepository.User{ApplicationID: message.ApplicationID}
 	if err := user.FindOne(findUser); err == nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "you are in blacklist"})
 		c.Abort()

@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"messenger/application"
+	"messenger/drepository"
 	"messenger/dto"
 	"net/http"
 
@@ -24,7 +24,7 @@ func FindAllDialogs(c *gin.Context) {
 		find.ApplicationID = c.Request.Header["Application-Id"][0]
 	}
 
-	dialog := &application.Dialog{ApplicationID: find.ApplicationID}
+	dialog := &drepository.Dialog{ApplicationID: find.ApplicationID}
 	dialogs, total, err := dialog.Find(find)
 
 	if err != nil {
@@ -47,7 +47,7 @@ func FindDialog(c *gin.Context) {
 		return
 	}
 
-	dialog := &application.Dialog{ApplicationID: find.ApplicationID}
+	dialog := &drepository.Dialog{ApplicationID: find.ApplicationID}
 
 	err = dialog.FindOne(find)
 

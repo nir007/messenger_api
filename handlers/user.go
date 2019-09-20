@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"messenger/application"
+	"messenger/drepository"
 	"messenger/dto"
 	"net/http"
 
@@ -10,7 +10,7 @@ import (
 
 // CreateUser creates new user
 func CreateUser(c *gin.Context) {
-	user := &application.User{}
+	user := &drepository.User{}
 	err := c.Bind(user)
 
 	if err != nil {
@@ -44,7 +44,7 @@ func FindAllUsers(c *gin.Context) {
 		return
 	}
 
-	user := &application.User{ApplicationID: find.ApplicationID}
+	user := &drepository.User{ApplicationID: find.ApplicationID}
 
 	users, total, err := user.Find(find)
 

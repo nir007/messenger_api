@@ -39,4 +39,5 @@ func InitSite(r *gin.Engine) {
 	admin.DELETE("/messages/:id", handlers.DeleteMessage)
 
 	admin.GET("/managers", handlers.FindOneManager)
+	admin.PUT("/managers", handlers.UpdateManager)
 }

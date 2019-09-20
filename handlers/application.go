@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"errors"
-	"messenger/application"
+	"messenger/drepository"
 	"messenger/dto"
 	"net/http"
 
@@ -11,7 +11,7 @@ import (
 
 // CreateApp creates new application
 func CreateApp(c *gin.Context) {
-	app := &application.Application{}
+	app := &drepository.Application{}
 	err := c.Bind(app)
 
 	if err != nil {
@@ -59,7 +59,7 @@ func FindAllApp(c *gin.Context) {
 		find.Managers = append(find.Managers, id.(string))
 	}
 
-	app := &application.Application{}
+	app := &drepository.Application{}
 	apps, total, err := app.Find(find)
 
 	if err != nil {
@@ -85,7 +85,7 @@ func UpdateAppSecret(c *gin.Context) {
 		return
 	}
 
-	application := &application.Application{ID: updateApplicationSecret.ID}
+	application := &drepository.Application{ID: updateApplicationSecret.ID}
 	_, err = application.Update()
 
 	if err != nil {

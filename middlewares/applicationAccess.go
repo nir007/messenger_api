@@ -1,7 +1,7 @@
 package middlewares
 
 import (
-	"messenger/application"
+	"messenger/drepository"
 	"messenger/dto"
 	"net/http"
 
@@ -41,7 +41,7 @@ func ApplicationAccess(c *gin.Context) {
 		Domains: []string{c.Request.Host},
 	}
 
-	app := &application.Application{}
+	app := &drepository.Application{}
 	err = app.FindOne(findApplication)
 
 	if err != nil {

@@ -2,7 +2,7 @@ package middlewares
 
 import (
 	"log"
-	"messenger/application"
+	"messenger/drepository"
 	"messenger/dto"
 	"time"
 
@@ -35,7 +35,7 @@ func (a *AuthMiddleware) GetAuthMiddleware() (*jwt.GinJWTMiddleware, error) {
 		MaxRefresh:  a.MaxRefresh,
 		IdentityKey: a.IdentityKey,
 		PayloadFunc: func(data interface{}) jwt.MapClaims {
-			if v, ok := data.(application.Manager); ok {
+			if v, ok := data.(drepository.Manager); ok {
 				return jwt.MapClaims{
 					a.IdentityKey: v.ID,
 					"email":       v.Email,
@@ -51,7 +51,7 @@ func (a *AuthMiddleware) GetAuthMiddleware() (*jwt.GinJWTMiddleware, error) {
 
 			c.Set("managerID", claims[a.IdentityKey].(string))
 
-			return application.Manager{
+			return drepository.Manager{
 				ID:    id,
 				Email: claims["email"].(string),
 			}
@@ -64,7 +64,7 @@ func (a *AuthMiddleware) GetAuthMiddleware() (*jwt.GinJWTMiddleware, error) {
 			}
 
 			find := &dto.FindManagers{Email: loginValues.Email}
-			manager := application.Manager{}
+			manager := drepository.Manager{}
 			_ = manager.FindOne(find)
 
 			if err := bcrypt.CompareHashAndPassword(
@@ -75,7 +75,7 @@ func (a *AuthMiddleware) GetAuthMiddleware() (*jwt.GinJWTMiddleware, error) {
 			return nil, jwt.ErrFailedAuthentication
 		},
 		Authorizator: func(data interface{}, c *gin.Context) bool {
-			if v, ok := data.(application.Manager); ok {
+			if v, ok := data.(drepository.Manager); ok {
 				c.Set(a.IdentityKey, v.ID)
 				c.Set("email", v.Email)
 				return true

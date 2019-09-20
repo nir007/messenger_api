@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"messenger/application"
+	"messenger/drepository"
 	"messenger/dto"
 	"net/http"
 
@@ -10,7 +10,7 @@ import (
 
 // CreateMessage creates new message
 func CreateMessage(c *gin.Context) {
-	message := &application.Message{}
+	message := &drepository.Message{}
 
 	err := c.ShouldBind(message)
 
@@ -54,7 +54,7 @@ func FindAllMessages(c *gin.Context) {
 		find.ApplicationID = c.Request.Header["Application-Id"][0]
 	}
 
-	message := &application.Message{ApplicationID: find.ApplicationID}
+	message := &drepository.Message{ApplicationID: find.ApplicationID}
 	messages, total, err := message.Find(find)
 
 	if err != nil {

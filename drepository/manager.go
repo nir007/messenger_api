@@ -1,4 +1,4 @@
-package application
+package drepository
 
 import (
 	"context"
@@ -23,7 +23,8 @@ type Manager struct {
 	IsConfirmed  bool               `json:"isConfirmed" binding:"-"`
 	ConfirmToken string             `json:"-" binding:"-"`
 	Phone        string             `json:"phone"`
-	Password     string             `json:"password" binding:"required,min=6"`
+	Password     string             `json:"-" binding:"required,min=6"`
+	Avatar       string             `json:"avatar"`
 	CreatedAt    string             `json:"createdAt" binding:"-"`
 	UpdatedAt    string             `json:"updatedAt" binding:"-"`
 }
@@ -39,7 +40,25 @@ func (mc *Manager) Delete() (int64, error) {
 
 //Update changes document
 func (mc *Manager) Update(find dto.SearchParamsGetter, update dto.BSONMaker) (int64, error) {
-	return 0, nil
+	collection := client.Database(dbName).Collection("managers")
+	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
+
+	updateResult, err := collection.UpdateOne(
+		ctx,
+		find.ToBson(),
+		bson.M{"$set": update.ToBson()},
+	)
+
+	if err != nil {
+		return 0, err
+	}
+
+	if updateResult == nil || updateResult.ModifiedCount == 0 {
+		return 0, errors.New("undefined manager")
+	}
+
+	_ = mc.FindOne(find)
+	return updateResult.ModifiedCount, nil
 }
 
 //Insert creates new document

@@ -1,8 +1,7 @@
 package handlers
 
 import (
-	"fmt"
-	"messenger/application"
+	"messenger/drepository"
 	"messenger/dto"
 	"net/http"
 
@@ -12,7 +11,7 @@ import (
 
 // CreateManager creates new manager
 func CreateManager(c *gin.Context) {
-	manager := &application.Manager{}
+	manager := &drepository.Manager{}
 	err := c.Bind(manager)
 
 	if err != nil {
@@ -38,10 +37,7 @@ func FindOneManager(c *gin.Context) {
 	id, _ := c.Get("managerID")
 	objectID, _ := primitive.ObjectIDFromHex(id.(string))
 
-	fmt.Println("id: ", id)
-
 	find := &dto.FindManagers{ID: objectID}
-
 	err := c.ShouldBind(find)
 
 	if err != nil {
@@ -50,8 +46,7 @@ func FindOneManager(c *gin.Context) {
 		return
 	}
 
-	manager := &application.Manager{}
-
+	manager := &drepository.Manager{}
 	err = manager.FindOne(find)
 
 	if err != nil {
@@ -67,7 +62,40 @@ func FindOneManager(c *gin.Context) {
 func FindAllManagers(c *gin.Context) {}
 
 // UpdateManager changes manager
-func UpdateManager(c *gin.Context) {}
+func UpdateManager(c *gin.Context) {
+	updateManager := &dto.UpdateManager{}
+	err := c.ShouldBind(updateManager)
+
+	id, _ := c.Get("managerID")
+	objectID, _ := primitive.ObjectIDFromHex(id.(string))
+
+	findMenager := &dto.FindManagers{ID: objectID}
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.Abort()
+		return
+	}
+
+	manager := &drepository.Manager{}
+	_, err = manager.Update(findMenager, updateManager)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.Abort()
+		return
+	}
+
+	manager.Password = ""
+
+	c.JSON(http.StatusOK, gin.H{"result": manager})
+
+}
+
+//UpdateManagerAvatar updates manager avatar
+func UpdateManagerAvatar(c *gin.Context) {
+
+}
 
 // DeleteManager removes manager
 func DeleteManager(c *gin.Context) {}
