@@ -31,7 +31,7 @@ func init() {
 // CORS returns cors policy handler
 func CORS() gin.HandlerFunc {
 	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{"http://localhost:8082"}
+	config.AllowOrigins = []string{"http://localhost:8082", "http://localhost:8081", "http://localhost:8080"}
 	config.AllowHeaders = []string{"Authorization", "Content-Type", "User-Agent"}
 
 	return cors.New(config)

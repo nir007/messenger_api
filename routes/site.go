@@ -40,4 +40,5 @@ func InitSite(r *gin.Engine) {
 
 	admin.GET("/managers", handlers.FindOneManager)
 	admin.PUT("/managers", handlers.UpdateManager)
+	admin.POST("/managers/avatar", handlers.UpdateManagerAvatar)
 }

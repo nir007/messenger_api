@@ -1,8 +1,11 @@
 package handlers
 
 import (
+	"bytes"
+	"io"
 	"messenger/drepository"
 	"messenger/dto"
+	"messenger/s3"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -94,7 +97,60 @@ func UpdateManager(c *gin.Context) {
 
 //UpdateManagerAvatar updates manager avatar
 func UpdateManagerAvatar(c *gin.Context) {
+	locationFull := ""
+	previewImage := ""
+	pathName := "avatars"
 
+	formFile, _ := c.FormFile("file")
+
+	file, _ := formFile.Open()
+	defer file.Close()
+
+	if isImage(formFile.Header["Content-Type"][0]) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "require jpeg or png format"})
+		c.Abort()
+		return
+	}
+
+	var copiedFile io.Reader
+	var buf bytes.Buffer
+
+	copiedFile = io.TeeReader(file, &buf)
+	preview, err := makePreview(copiedFile)
+
+	if err == nil {
+		newFileName, _ := newFileName(pathName, formFile.Header["Content-Type"][0])
+		previewImage, _ = s3.Upload(preview, newFileName)
+	}
+
+	newFileName, err := newFileName(pathName, formFile.Header["Content-Type"][0])
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.Abort()
+		return
+	}
+
+	var errUpload error
+	if buf.Len() == 0 {
+		locationFull, errUpload = s3.Upload(file, newFileName)
+	} else {
+		r := bytes.NewReader(buf.Bytes())
+		locationFull, errUpload = s3.Upload(r, newFileName)
+	}
+
+	if errUpload != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": errUpload.Error()})
+		c.Abort()
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"result": map[string]string{
+			"url":        locationFull,
+			"previewUrl": previewImage,
+			"type":       formFile.Header["Content-Type"][0],
+		}})
 }
 
 // DeleteManager removes manager
