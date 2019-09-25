@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // CreateApp creates new application
@@ -15,14 +16,14 @@ func CreateApp(c *gin.Context) {
 	err := c.Bind(app)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "code": BindingError})
 		c.Abort()
 		return
 	}
 
 	managerID, ok := c.Get("managerID")
 	if !ok {
-		c.JSON(http.StatusBadRequest, gin.H{"error": errors.New("undefined manager id")})
+		c.JSON(http.StatusNotFound, gin.H{"error": errors.New("undefined manager id"), "code": NotFoundError})
 		c.Abort()
 		return
 	}
@@ -32,7 +33,7 @@ func CreateApp(c *gin.Context) {
 	_, err = app.Insert()
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "code": CreateDbError})
 		c.Abort()
 		return
 	}
@@ -41,7 +42,29 @@ func CreateApp(c *gin.Context) {
 }
 
 // FindOneApp handles http request
-func FindOneApp(c *gin.Context) {}
+func FindOneApp(c *gin.Context) {
+	id := c.Param("id")
+	objectID, err := primitive.ObjectIDFromHex(id)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "code": InvalidIdentifier})
+		c.Abort()
+		return
+	}
+
+	find := &dto.FindApplications{ID: objectID}
+
+	application := &drepository.Application{}
+	err = application.FindOne(find)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error(), "code": FindDbError})
+		c.Abort()
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"result": application})
+}
 
 // FindAllApp handles http request
 func FindAllApp(c *gin.Context) {
@@ -49,7 +72,7 @@ func FindAllApp(c *gin.Context) {
 	err := c.ShouldBind(find)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error1": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "code": BindingError})
 		c.Abort()
 		return
 	}
@@ -63,7 +86,7 @@ func FindAllApp(c *gin.Context) {
 	apps, total, err := app.Find(find)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error(),"code": FindDbError})
 		c.Abort()
 		return
 	}
@@ -80,7 +103,7 @@ func UpdateAppSecret(c *gin.Context) {
 	err := c.Bind(updateApplicationSecret)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "code": BindingError})
 		c.Abort()
 		return
 	}
@@ -89,7 +112,7 @@ func UpdateAppSecret(c *gin.Context) {
 	_, err = application.Update()
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "code": UpdateDbError})
 		c.Abort()
 		return
 	}

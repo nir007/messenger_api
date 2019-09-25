@@ -7,7 +7,7 @@ import (
 	"messenger/dto"
 	"time"
 
-	uuid "github.com/satori/go.uuid"
+	uuid "github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -23,7 +23,7 @@ type Manager struct {
 	IsConfirmed  bool               `json:"isConfirmed" binding:"-"`
 	ConfirmToken string             `json:"-" binding:"-"`
 	Phone        string             `json:"phone"`
-	Password     string             `json:"-" binding:"required,min=6"`
+	Password     string             `json:"password" binding:"required,min=6"`
 	Avatar       string             `json:"avatar"`
 	CreatedAt    string             `json:"createdAt" binding:"-"`
 	UpdatedAt    string             `json:"updatedAt" binding:"-"`
@@ -76,7 +76,7 @@ func (mc *Manager) Insert() (string, error) {
 	hash, _ := bcrypt.GenerateFromPassword([]byte(mc.Password), 14)
 	mc.Password = string(hash)
 
-	u1 := uuid.Must(uuid.NewV4(), nil)
+	u1 := uuid.New().String()
 	mc.ConfirmToken = fmt.Sprintf("%s", u1)
 
 	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)

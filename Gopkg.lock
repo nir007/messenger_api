@@ -51,7 +51,7 @@
     "service/s3/s3iface",
     "service/s3/s3manager",
     "service/sts",
-    "service/sts/stsiface"
+    "service/sts/stsiface",
   ]
   pruneopts = "UT"
   revision = "cf5210b77b6f9d40c4c34a0bc793f3bdbe4bc877"
@@ -96,7 +96,7 @@
     ".",
     "binding",
     "internal/json",
-    "render"
+    "render",
   ]
   pruneopts = "UT"
   revision = "b75d67cd51eb53c3c3a2fc406524c940021ffbda"
@@ -228,7 +228,7 @@
     "x/mongo/driver/session",
     "x/mongo/driver/topology",
     "x/mongo/driver/uuid",
-    "x/mongo/driver/wiremessage"
+    "x/mongo/driver/wiremessage",
   ]
   pruneopts = "UT"
   revision = "d42ea7239f0db8a61e77191b9f2730a922459042"
@@ -241,7 +241,7 @@
   packages = [
     "bcrypt",
     "blowfish",
-    "pbkdf2"
+    "pbkdf2",
   ]
   pruneopts = "UT"
   revision = "4def268fd1a49955bfb3dda92fe3db4f924f2285"
@@ -254,7 +254,7 @@
     "bmp",
     "ccitt",
     "tiff",
-    "tiff/lzw"
+    "tiff/lzw",
   ]
   pruneopts = "UT"
   revision = "cb417be4ba39d22a85fafbeeb47bb89396d4d7b4"
@@ -284,7 +284,7 @@
     "internal/ucd",
     "transform",
     "unicode/cldr",
-    "unicode/norm"
+    "unicode/norm",
   ]
   pruneopts = "UT"
   revision = "342b2e1fbaa52c93f31447ad2c6abc048c63e475"
@@ -323,7 +323,7 @@
     "go.mongodb.org/mongo-driver/mongo",
     "go.mongodb.org/mongo-driver/mongo/options",
     "golang.org/x/crypto/bcrypt",
-    "gopkg.in/yaml.v2"
+    "gopkg.in/yaml.v2",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

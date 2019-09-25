@@ -6,10 +6,11 @@ import (
 	"messenger/dto"
 	"time"
 
-	uuid "github.com/satori/go.uuid"
+	uuid "github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"errors"
 )
 
 // Application struct for messeneger application
@@ -19,8 +20,8 @@ type Application struct {
 	Description string             `json:"description" binding:"required,max=100,min=1"`
 	Secret      string             `json:"secret"`
 	Domains     []string           `json:"domains" binding:"required"`
-	CreatedAt   string             `json:"createdAt"`
-	UpdatedAt   string             `json:"updatedAt"`
+	CreatedAt   string             `json:"createdAt" bson:"-"`
+	UpdatedAt   string             `json:"updatedAt" bson:"-"`
 	Managers    []string           `json:"managers" binding:"required"`
 }
 
@@ -38,7 +39,7 @@ func (mc *Application) Update() (int64, error) {
 	collection := client.Database(dbName).Collection("applications")
 	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
 
-	u1 := uuid.Must(uuid.NewV4(), nil)
+	u1 := uuid.New().String()
 	mc.Secret = fmt.Sprintf("%s", u1)
 	mc.UpdatedAt = time.Now().String()
 
@@ -62,7 +63,7 @@ func (mc *Application) Insert() (string, error) {
 	mc.ID = primitive.NewObjectID()
 	mc.CreatedAt = time.Now().String()
 	mc.UpdatedAt = ""
-	u1 := uuid.Must(uuid.NewV4(), nil)
+	u1 := uuid.New().String()
 	mc.Secret = fmt.Sprintf("%s", u1)
 
 	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
@@ -90,14 +91,14 @@ func (mc *Application) Find(find dto.SearchParamsGetter) ([]interface{}, int64, 
 	collection := client.Database(dbName).Collection("applications")
 	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
 
-	options := &options.FindOptions{Skip: find.Skip(), Limit: find.Limit(), Sort: find.Sort()}
+	opt := &options.FindOptions{Skip: find.Skip(), Limit: find.Limit(), Sort: find.Sort()}
 
 	total, err := collection.CountDocuments(ctx, find.ToBson())
 	if err != nil {
 		return result, 0, err
 	}
 
-	cur, err := collection.Find(ctx, find.ToBson(), options)
+	cur, err := collection.Find(ctx, find.ToBson(), opt)
 	if err != nil {
 		return make([]interface{}, 0), 0, err
 	}
@@ -109,7 +110,7 @@ func (mc *Application) Find(find dto.SearchParamsGetter) ([]interface{}, int64, 
 		err := cur.Decode(app)
 		result = append(result, *app)
 		if err != nil {
-			return make([]interface{}, 0), 0, err
+			return make([]interface{}, 0), 0, errors.New("dick pussy")
 		}
 	}
 

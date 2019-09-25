@@ -9,10 +9,10 @@ import (
 	"io"
 	"messenger/s3"
 	"net/http"
-	"os/exec"
 	"strings"
 	"time"
 
+	uuid "github.com/google/uuid"
 	"github.com/disintegration/imaging"
 	"github.com/gin-gonic/gin"
 )
@@ -81,14 +81,10 @@ func newFileName(path, mimeType string) (string, error) {
 		"application/pdf": "pdf",
 	}
 
-	uuid, err := exec.Command("uuidgen").Output()
-
-	if err != nil {
-		return "", err
-	}
+	uuid := uuid.New().String()
 
 	time := time.Now()
-	result = result + "/" + string(uuid) + "_" + strings.ReplaceAll(time.String(), " ", "_")
+	result = result + "/" + string(uuid) + "_" + strings.Replace(time.String(), " ", "_", -1)
 
 	if ext, ok := mimeTypes[mimeType]; ok {
 		return result + "." + ext, nil

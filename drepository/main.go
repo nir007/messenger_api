@@ -23,6 +23,12 @@ func init() {
 
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	client, err = mongo.Connect(ctx, options.Client().ApplyURI(conf["connection"].(string)))
+
+	if (conf["dbName"] == nil) {
+		panic(err)
+	}
+
+
 	dbName = conf["dbName"].(string)
 
 	if err != nil {

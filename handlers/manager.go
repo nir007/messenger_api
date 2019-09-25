@@ -106,7 +106,7 @@ func UpdateManagerAvatar(c *gin.Context) {
 	file, _ := formFile.Open()
 	defer file.Close()
 
-	if isImage(formFile.Header["Content-Type"][0]) {
+	if !isImage(formFile.Header["Content-Type"][0]) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "require jpeg or png format"})
 		c.Abort()
 		return
