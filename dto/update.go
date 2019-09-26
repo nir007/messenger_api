@@ -7,14 +7,30 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// UpdateApplicationSecret struct for for updating secret key of application
-type UpdateApplicationSecret struct {
-	ID primitive.ObjectID `json:"id" binding:"required"`
+// UpdateApplication struct for for updating application
+type UpdateApplication struct {
+	ID          primitive.ObjectID `json:"id" binding:"-" bson:"_id,omitempty"`
+	Name        string             `json:"name" binding:"max=50,min=1" bson:"name,omitempty"`
+	Description string             `json:"description" binding:"max=100,min=1" bson:"description,omitempty"`
+	Domains     []string           `json:"domains" bson:"domains,omitempty"`
+	Managers    []string           `json:"managers" bson:"managers,omitempty"`
+	Secret      string             `json:"secret" bson:"secret,omitempty"`
+	UpdatedAt   string             `json:"updatedAt" binding:"-" bson:"updatedat,omitempty"`
+}
+
+// ToBson forms bson struct for searching documents
+func (f *UpdateApplication) ToBson() bson.M {
+	f.UpdatedAt = time.Now().String()
+	b, _ := bson.Marshal(f)
+
+	var dataM bson.M
+	_ = bson.Unmarshal(b, &dataM)
+
+	return dataM
 }
 
 // UpdateDialog struct for for updating dialog
 type UpdateDialog struct {
-	MyBSON      `bson:"-"`
 	ID          primitive.ObjectID `json:"id" bson:"_id,omitempty"`
 	UID1        string             `json:"uid1" bson:"uid1,omitempty"`
 	UID2        string             `json:"uid2" bson:"uid2,omitempty"`
@@ -36,9 +52,9 @@ func (f *UpdateDialog) ToBson() bson.M {
 // UpdateManager struct for updatind manager data
 type UpdateManager struct {
 	ID          primitive.ObjectID `json:"id" bson:"_id,omitempty"`
-	Name        string             `json:"name" binding:"required,max=50,min=1"`
-	SecondName  string             `json:"second" binding:"required,max=50,min=1"`
-	Email       string             `json:"email" binding:"required,email"`
+	Name        string             `json:"name" binding:"max=50,min=1"`
+	SecondName  string             `json:"second" binding:"max=50,min=1"`
+	Email       string             `json:"email" binding:"email"`
 	IsConfirmed bool               `json:"isConfirmed" binding:"-"`
 	Phone       string             `json:"phone"`
 	UpdatedAt   string             `json:"updatedAt" binding:"-" bson:"updatedat,omitempty"`

@@ -22,8 +22,7 @@ func InitSite(r *gin.Engine) {
 	admin.POST("/applications", handlers.CreateApp)
 	admin.GET("/applications/:id", handlers.FindOneApp)
 	admin.GET("/applications", handlers.FindAllApp)
-	admin.PUT("/applications", handlers.UpdateApp)
-	admin.PUT("/applications/secret-key", handlers.UpdateAppSecret)
+	admin.PUT("/applications/:id", handlers.UpdateApp)
 	admin.DELETE("/applications/:id", handlers.DeleteApp)
 
 	admin.POST("/users", handlers.CreateUser)

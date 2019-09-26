@@ -48,7 +48,7 @@ func (mc *Dialog) Update(find dto.SearchParamsGetter, update dto.BSONMaker) (int
 	}
 
 	if updateResult == nil || updateResult.ModifiedCount == 0 {
-		return 0, errors.New("undefined doalog")
+		return 0, errors.New("undefined dialog")
 	}
 
 	_ = mc.FindOne(find)

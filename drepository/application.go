@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"messenger/dto"
 	"time"
+	"errors"
 
 	uuid "github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"errors"
 )
 
 // Application struct for messeneger application
@@ -35,24 +35,25 @@ func (mc *Application) Delete() (int64, error) {
 }
 
 // Update updates documents
-func (mc *Application) Update() (int64, error) {
+func (mc *Application) Update(find dto.SearchParamsGetter, update dto.BSONMaker) (int64, error) {
 	collection := client.Database(dbName).Collection("applications")
 	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
 
-	u1 := uuid.New().String()
-	mc.Secret = fmt.Sprintf("%s", u1)
-	mc.UpdatedAt = time.Now().String()
-
 	updateResult, err := collection.UpdateOne(
 		ctx,
-		bson.M{"_id": mc.ID},
-		bson.M{"$set": bson.M{"secret": mc.Secret, "updatedat": mc.UpdatedAt}},
+		find.ToBson(),
+		bson.M{"$set": update.ToBson()},
 	)
 
 	if err != nil {
 		return 0, err
 	}
 
+	if updateResult == nil || updateResult.ModifiedCount == 0 {
+		return 0, errors.New("undefined application")
+	}
+
+	_ = mc.FindOne(find)
 	return updateResult.ModifiedCount, err
 }
 
@@ -63,8 +64,7 @@ func (mc *Application) Insert() (string, error) {
 	mc.ID = primitive.NewObjectID()
 	mc.CreatedAt = time.Now().String()
 	mc.UpdatedAt = ""
-	u1 := uuid.New().String()
-	mc.Secret = fmt.Sprintf("%s", u1)
+	mc.Secret = uuid.New().String()
 
 	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
 	res, err := collection.InsertOne(ctx, mc)

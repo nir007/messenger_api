@@ -6,6 +6,7 @@ import (
 	"messenger/dto"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -95,12 +96,20 @@ func FindAllApp(c *gin.Context) {
 }
 
 // UpdateApp changes application
-func UpdateApp(c *gin.Context) {}
+func UpdateApp(c *gin.Context) {
+	id := c.Param("id")
+	objectID, err := primitive.ObjectIDFromHex(id)
 
-// UpdateAppSecret changes application secret key
-func UpdateAppSecret(c *gin.Context) {
-	updateApplicationSecret := &dto.UpdateApplicationSecret{}
-	err := c.Bind(updateApplicationSecret)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "code": InvalidIdentifier})
+		c.Abort()
+		return
+	}
+
+	findApp := &dto.FindApplications{ID: objectID}
+
+	updateApp := &dto.UpdateApplication{}
+	err = c.ShouldBind(updateApp)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "code": BindingError})
@@ -108,16 +117,20 @@ func UpdateAppSecret(c *gin.Context) {
 		return
 	}
 
-	application := &drepository.Application{ID: updateApplicationSecret.ID}
-	_, err = application.Update()
+	if len(updateApp.Secret) > 0 {
+		updateApp.Secret = uuid.New().String()
+	}
+
+	application := &drepository.Application{}
+	_, err = application.Update(findApp, updateApp)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "code": UpdateDbError})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error(), "code": UpdateDbError})
 		c.Abort()
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"result": application.Secret})
+	c.JSON(http.StatusOK, gin.H{"result": application})
 }
 
 // DeleteApp removes application
