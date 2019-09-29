@@ -27,10 +27,11 @@ type Manager struct {
 	Avatar       string             `json:"avatar"`
 	CreatedAt    string             `json:"createdAt" binding:"-"`
 	UpdatedAt    string             `json:"updatedAt" binding:"-"`
+	DeletedAt    string             `json:"deletedAt" binding:"-"`
 }
 
 // Delete deletes documents
-func (mc *Manager) Delete() (int64, error) {
+func (mc *Manager) Delete(id, applicationID string) (int64, error) {
 	collection := client.Database(dbName).Collection("managers")
 	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
 	deleteResult, err := collection.DeleteOne(ctx, bson.M{"_id": mc.ID})

@@ -22,11 +22,12 @@ type Application struct {
 	Domains     []string           `json:"domains" binding:"required"`
 	CreatedAt   string             `json:"createdAt" bson:"-"`
 	UpdatedAt   string             `json:"updatedAt" bson:"-"`
+	DeletedAt   string             `json:"deletedAt" binding:"-"`
 	Managers    []string           `json:"managers" binding:"required"`
 }
 
 // Delete deletes documents
-func (mc *Application) Delete() (int64, error) {
+func (mc *Application) Delete(id, applicationID string) (int64, error) {
 	collection := client.Database(dbName).Collection("applications")
 	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
 	deleteResult, err := collection.DeleteOne(ctx, bson.M{"_id": mc.ID})

@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // CreateUser creates new user
@@ -31,9 +32,31 @@ func CreateUser(c *gin.Context) {
 }
 
 // FindOneUser search one user
-func FindOneUser(c *gin.Context) {}
+func FindOneUser(c *gin.Context) {
+	userID := c.Param("id")
+	appID := c.Param("appID")
+	objectID, err := primitive.ObjectIDFromHex(userID)
 
-// FindAllUsers search  userss
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "code": InvalidIdentifier})
+		c.Abort()
+		return
+	}
+
+	find := &dto.FindUsers{ID: objectID, ApplicationID: appID}
+	user := &drepository.User{ApplicationID: appID}
+	err = user.FindOne(find)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error(), "code": FindDbError})
+		c.Abort()
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"result": user})
+}
+
+// FindAllUsers find users
 func FindAllUsers(c *gin.Context) {
 	find := &dto.FindUsers{}
 	err := c.ShouldBind(find)
@@ -44,8 +67,11 @@ func FindAllUsers(c *gin.Context) {
 		return
 	}
 
-	user := &drepository.User{ApplicationID: find.ApplicationID}
+	if len(find.ApplicationID) == 0 {
+		find.ApplicationID = c.Param("appID")
+	}
 
+	user := &drepository.User{ApplicationID: find.ApplicationID}
 	users, total, err := user.Find(find)
 
 	if err != nil {
@@ -61,4 +87,18 @@ func FindAllUsers(c *gin.Context) {
 func UpdateUser(c *gin.Context) {}
 
 // DeleteUser removes user
-func DeleteUser(c *gin.Context) {}
+func DeleteUser(c *gin.Context) {
+	userID := c.Param("id")
+	appID := c.Param("appID")
+
+	user := &drepository.User{ApplicationID: appID}
+	_, err := user.Delete(userID, appID)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error(), "code": DeleteDbError})
+		c.Abort()
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"result": true})
+}

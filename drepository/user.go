@@ -25,16 +25,32 @@ type User struct {
 	BlackList     []string           `json:"blackList"`
 	CreatedAt     string             `json:"createdAt" binding:"-"`
 	UpdatedAt     string             `json:"updatedAt" binding:"-"`
+	DeletedAt     string             `json:"deletedAt" binding:"-"`
 	ApplicationID string             `json:"applicationID" binding:"required"`
 }
 
 // Delete deletes documents
-func (mc *User) Delete() (int64, error) {
-	collection := client.Database(dbName).Collection("users_" + mc.ApplicationID)
+func (mc *User) Delete(id, appID string) (int64, error) {
+	collection := client.Database(dbName).Collection("users_" + appID)
 	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
-	deleteResult, err := collection.DeleteOne(ctx, bson.M{"_id": mc.ID})
 
-	return deleteResult.DeletedCount, err
+	objectID, err := primitive.ObjectIDFromHex(id)
+
+	if err != nil {
+		return 0, err
+	}
+
+	updated, err := collection.UpdateOne(
+		ctx,
+		bson.M{"_id": objectID, "applicationid": appID},
+		bson.M{"$set": bson.M{"deletedat": time.Now().String()}},
+	)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return updated.ModifiedCount, err
 }
 
 // Update updates documents

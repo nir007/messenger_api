@@ -39,13 +39,15 @@ type FindUsers struct {
 	Name          string             `json:"name" form:"name" bson:"name,omitempty"`
 	Second        string             `json:"second" form:"second" bson:"second,omitempty"`
 	ApplicationID string             `json:"applicationId" form:"applicationid" bson:"applicationid,omitempty"`
-	BlackList     []string           `json:"blackList"`
+	BlackList     []string           `json:"blackList" bson:"blacklist,omitempty"`
 	Email         string             `json:"email" form:"email" bson:"email,omitempty"`
 	Phone         string             `json:"phone" form:"phone" bson:"phone,omitempty"`
+	DeletedAt     string             `json:"deletedAt" binding:"-" bson:"deletedat"`
 }
 
 // ToBson forms bson struct for searching documents
 func (f *FindUsers) ToBson() bson.M {
+	f.DeletedAt = ""
 	b, _ := bson.Marshal(f)
 	var dataM bson.M
 	_ = bson.Unmarshal(b, &dataM)
@@ -62,10 +64,12 @@ type FindManagers struct {
 	Second string             `json:"second" form:"second" bson:"second,omitempty"`
 	Email  string             `json:"email" form:"email" bson:"email,omitempty"`
 	Phone  string             `json:"phone" form:"phone" bson:"phone,omitempty"`
+	DeletedAt     string             `json:"deletedAt" binding:"-" bson:"deletedat"`
 }
 
 // ToBson forms bson struct for searching documents
 func (f *FindManagers) ToBson() bson.M {
+	f.DeletedAt = ""
 	b, _ := bson.Marshal(f)
 	var dataM bson.M
 	_ = bson.Unmarshal(b, &dataM)
@@ -83,10 +87,12 @@ type FindDialogs struct {
 	UID1          string             `json:"uid1" form:"uid1" bson:"uid1,omitempty"`
 	UID2          string             `json:"uid2" form:"uid2" bson:"uid2,omitempty"`
 	IsRed         bool               `json:"isRed" form:"isRed" bson:"isred,omitempty"`
+	DeletedAt     string             `json:"deletedAt" binding:"-" bson:"deletedat"`
 }
 
 // ToBson forms bson struct for searching documents
 func (f *FindDialogs) ToBson() bson.M {
+	f.DeletedAt = ""
 	b, _ := bson.Marshal(f)
 	var dataM bson.M
 	_ = bson.Unmarshal(b, &dataM)
@@ -122,10 +128,12 @@ type FindMessages struct {
 	UID1          string             `json:"uid1" form:"uid1" bson:"uid1,omitempty"`
 	UID2          string             `json:"uid2" form:"uid2" bson:"uid2,omitempty"`
 	IsRed         bool               `json:"isRed" form:"isRed" bson:"isred,omitempty"`
+	DeletedAt     string             `json:"deletedAt" binding:"-" bson:"deletedat"`
 }
 
 // ToBson forms bson struct for searching documents
 func (f *FindMessages) ToBson() bson.M {
+	f.DeletedAt = ""
 	b, _ := bson.Marshal(f)
 	var dataM bson.M
 	_ = bson.Unmarshal(b, &dataM)

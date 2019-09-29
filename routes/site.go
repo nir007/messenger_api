@@ -26,10 +26,10 @@ func InitSite(r *gin.Engine) {
 	admin.DELETE("/applications/:id", handlers.DeleteApp)
 
 	admin.POST("/users", handlers.CreateUser)
-	admin.GET("/users/:id", handlers.FindOneUser)
-	admin.GET("/users", handlers.FindAllUsers)
+	admin.GET("/users/:id/:appID", handlers.FindOneUser)
+	admin.GET("/application/users/:appID", handlers.FindAllUsers)
 	admin.PUT("/users", handlers.UpdateUser)
-	admin.DELETE("/users/:id", handlers.DeleteUser)
+	admin.DELETE("/users/:id/:appID", handlers.DeleteUser)
 
 	admin.POST("/messages", middlewares.Blacklist, handlers.CreateMessage)
 	admin.GET("/messages/:id", handlers.FindOneMessage)
