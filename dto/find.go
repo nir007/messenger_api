@@ -15,6 +15,7 @@ type FindApplications struct {
 	Managers  []string           `json:"managers" form:"managers" bson:"managers,omitempty"`
 	ManagerID string             `json:"managerID" form:"managerid" bson:"-"`
 	Domains   []string           `json:"domains" bson:"domains,omitempty"`
+	DeletedAt     string         `json:"deletedAt" binding:"-" bson:"deletedat"`
 }
 
 // ToBson forms bson struct for searching documents
@@ -57,14 +58,14 @@ func (f *FindUsers) ToBson() bson.M {
 
 // FindManagers struct for finding users of application
 type FindManagers struct {
-	MyBSON `bson:"-"`
-	Page   `bson:"-"`
-	ID     primitive.ObjectID `json:"id" bson:"_id,omitempty"`
-	Name   string             `json:"name" form:"name" bson:"name,omitempty"`
-	Second string             `json:"second" form:"second" bson:"second,omitempty"`
-	Email  string             `json:"email" form:"email" bson:"email,omitempty"`
-	Phone  string             `json:"phone" form:"phone" bson:"phone,omitempty"`
-	DeletedAt     string             `json:"deletedAt" binding:"-" bson:"deletedat"`
+	MyBSON    `bson:"-"`
+	Page      `bson:"-"`
+	ID        primitive.ObjectID `json:"id" bson:"_id,omitempty"`
+	Name      string             `json:"name" form:"name" bson:"name,omitempty"`
+	Second    string             `json:"second" form:"second" bson:"second,omitempty"`
+	Email     string             `json:"email" form:"email" bson:"email,omitempty"`
+	Phone     string             `json:"phone" form:"phone" bson:"phone,omitempty"`
+	DeletedAt string             `json:"deletedAt" binding:"-" bson:"deletedat"`
 }
 
 // ToBson forms bson struct for searching documents
