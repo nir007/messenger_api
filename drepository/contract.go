@@ -5,7 +5,7 @@ import "messenger/dto"
 // MongoDbManager for application structs
 type MongoDbManager interface {
 	// Delete deletes documents
-	Delete(id, applicationID string) (int64, error)
+	Delete() (int64, error)
 	// Update updates documents
 	Update(find dto.SearchParamsGetter, update dto.BSONMaker) (int64, error)
 	//Insert  creates new document

@@ -19,20 +19,34 @@ type Application struct {
 	Name        string             `json:"name" binding:"required,max=50,min=1"`
 	Description string             `json:"description" binding:"required,max=100,min=1"`
 	Secret      string             `json:"secret"`
+	Salt        string             `json:"salt"`
 	Domains     []string           `json:"domains" binding:"required"`
-	CreatedAt   string             `json:"createdAt" bson:"-"`
-	UpdatedAt   string             `json:"updatedAt" bson:"-"`
+	CreatedAt   string             `json:"createdAt" binding:"-" `
+	UpdatedAt   string             `json:"updatedAt" binding:"-"`
 	DeletedAt   string             `json:"deletedAt" binding:"-"`
 	Managers    []string           `json:"managers" binding:"required"`
 }
 
 // Delete deletes documents
-func (mc *Application) Delete(id, applicationID string) (int64, error) {
+func (mc *Application) Delete() (int64, error) {
 	collection := client.Database(dbName).Collection("applications")
 	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
-	deleteResult, err := collection.DeleteOne(ctx, bson.M{"_id": mc.ID})
 
-	return deleteResult.DeletedCount, err
+	if err != nil {
+		return 0, err
+	}
+
+	updateResult, err := collection.UpdateOne(
+		ctx,
+		bson.M{"_id": mc.ID},
+		bson.M{"$set": bson.M{"deletedat": time.Now().String()}},
+	)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return updateResult.ModifiedCount, err
 }
 
 // Update updates documents
@@ -65,6 +79,7 @@ func (mc *Application) Insert() (string, error) {
 	mc.ID = primitive.NewObjectID()
 	mc.CreatedAt = time.Now().String()
 	mc.UpdatedAt = ""
+	mc.DeletedAt = ""
 	mc.Secret = uuid.New().String()
 
 	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
@@ -93,6 +108,8 @@ func (mc *Application) Find(find dto.SearchParamsGetter) ([]interface{}, int64, 
 	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
 
 	opt := &options.FindOptions{Skip: find.Skip(), Limit: find.Limit(), Sort: find.Sort()}
+
+	fmt.Println("find.ToBson(): ", find.ToBson())
 
 	total, err := collection.CountDocuments(ctx, find.ToBson())
 	if err != nil {

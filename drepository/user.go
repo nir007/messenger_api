@@ -9,12 +9,14 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"errors"
 )
 
 // User struct for messenger app users
 type User struct {
 	ID            primitive.ObjectID `json:"id" bson:"_id,omitempty"`
 	UID           string             `json:"uid" binding:"required"`
+	ApplicationID string             `json:"applicationID" binding:"required"`
 	Name          string             `json:"name" binding:"required"`
 	SecondName    string             `json:"second" binding:"required"`
 	Avatar        string             `json:"avatar"`
@@ -26,23 +28,16 @@ type User struct {
 	CreatedAt     string             `json:"createdAt" binding:"-"`
 	UpdatedAt     string             `json:"updatedAt" binding:"-"`
 	DeletedAt     string             `json:"deletedAt" binding:"-"`
-	ApplicationID string             `json:"applicationID" binding:"required"`
 }
 
 // Delete deletes documents
-func (mc *User) Delete(id, appID string) (int64, error) {
-	collection := client.Database(dbName).Collection("users_" + appID)
+func (mc *User) Delete() (int64, error) {
+	collection := client.Database(dbName).Collection("users_" + mc.ApplicationID)
 	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
-
-	objectID, err := primitive.ObjectIDFromHex(id)
-
-	if err != nil {
-		return 0, err
-	}
 
 	updated, err := collection.UpdateOne(
 		ctx,
-		bson.M{"_id": objectID, "applicationid": appID},
+		bson.M{"_id": mc.ID},
 		bson.M{"$set": bson.M{"deletedat": time.Now().String()}},
 	)
 
@@ -53,9 +48,27 @@ func (mc *User) Delete(id, appID string) (int64, error) {
 	return updated.ModifiedCount, err
 }
 
-// Update updates documents
+// Update updates one document
 func (mc *User) Update(find dto.SearchParamsGetter, update dto.BSONMaker) (int64, error) {
-	return 0, nil
+	collection := client.Database(dbName).Collection("users_" + mc.ApplicationID)
+	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
+
+	updateResult, err := collection.UpdateOne(
+		ctx,
+		find.ToBson(),
+		bson.M{"$set": update.ToBson()},
+	)
+
+	if err != nil {
+		return 0, err
+	}
+
+	if updateResult == nil || updateResult.ModifiedCount == 0 {
+		return 0, errors.New("undefined user")
+	}
+
+	_ = mc.FindOne(find)
+	return updateResult.ModifiedCount, nil
 }
 
 //Insert creates new document

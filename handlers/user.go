@@ -84,15 +84,61 @@ func FindAllUsers(c *gin.Context) {
 }
 
 // UpdateUser changes user
-func UpdateUser(c *gin.Context) {}
+func UpdateUser(c *gin.Context) {
+	userID := c.Param("id")
+	appID := c.Param("appID")
+
+	userObjectID, err := primitive.ObjectIDFromHex(userID)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "code": InvalidIdentifier})
+		c.Abort()
+		return
+	}
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "code": InvalidIdentifier})
+		c.Abort()
+		return
+	}
+
+	findUser := &dto.FindUsers{ID: userObjectID, ApplicationID: appID}
+	updateUser := &dto.UpdateUser{}
+	err = c.ShouldBind(updateUser)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "code": BindingError})
+		c.Abort()
+		return
+	}
+
+	user := &drepository.User{ApplicationID: appID}
+	_, err = user.Update(findUser, updateUser)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error(), "code": UpdateDbError})
+		c.Abort()
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"result": user})
+}
 
 // DeleteUser removes user
 func DeleteUser(c *gin.Context) {
 	userID := c.Param("id")
 	appID := c.Param("appID")
 
-	user := &drepository.User{ApplicationID: appID}
-	_, err := user.Delete(userID, appID)
+	objectID, err := primitive.ObjectIDFromHex(userID)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "code": InvalidIdentifier})
+		c.Abort()
+		return
+	}
+
+	user := &drepository.User{ID: objectID, ApplicationID: appID}
+	_, err = user.Delete()
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error(), "code": DeleteDbError})

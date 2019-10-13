@@ -14,12 +14,36 @@ type UpdateApplication struct {
 	Description string             `json:"description" binding:"max=100,min=1" bson:"description,omitempty"`
 	Domains     []string           `json:"domains" bson:"domains,omitempty"`
 	Managers    []string           `json:"managers" bson:"managers,omitempty"`
-	Secret      string             `json:"secret" bson:"secret,omitempty"`
+	Secret      string             `json:"secret" binding:"-" bson:"secret,omitempty"`
+	Salt        string             `json:"salt" bson:"salt,omitempty"`
 	UpdatedAt   string             `json:"updatedAt" binding:"-" bson:"updatedat,omitempty"`
 }
 
 // ToBson forms bson struct for searching documents
 func (f *UpdateApplication) ToBson() bson.M {
+	f.UpdatedAt = time.Now().String()
+	b, _ := bson.Marshal(f)
+
+	var dataM bson.M
+	_ = bson.Unmarshal(b, &dataM)
+
+	return dataM
+}
+
+// UpdateUser struct for updating application user
+type UpdateUser struct {
+	ID          primitive.ObjectID `json:"id" binding:"-" bson:"_id,omitempty"`
+	UID        string              `json:"uid" bson:"uid,omitempty"`
+	Name        string             `json:"name" binding:"max=50,min=1" bson:"name,omitempty"`
+	SecondName  string             `json:"second" binding:"max=100,min=1" bson:"description,omitempty"`
+	BlackList   []string           `json:"blackList" bson:"blacklist,omitempty"`
+	Email       string             `json:"email" bson:"email,omitempty"`
+	Phone       string             `json:"phone"  bson:"phone,omitempty"`
+	UpdatedAt   string             `json:"updatedAt" binding:"-" bson:"updatedat,omitempty"`
+}
+
+// ToBson forms bson struct for searching documents
+func (f *UpdateUser) ToBson() bson.M {
 	f.UpdatedAt = time.Now().String()
 	b, _ := bson.Marshal(f)
 

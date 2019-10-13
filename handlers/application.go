@@ -133,5 +133,26 @@ func UpdateApp(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"result": application})
 }
 
-// DeleteApp removes application
-func DeleteApp(c *gin.Context) {}
+// DeleteApp marks application as deleted
+func DeleteApp(c *gin.Context) {
+	id := c.Param("id")
+	objectID, err := primitive.ObjectIDFromHex(id)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "code": InvalidIdentifier})
+		c.Abort()
+		return
+	}
+
+	app := &drepository.Application{ID: objectID}
+
+	_, err = app.Delete()
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error(), "code": DeleteDbError})
+		c.Abort()
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"result": true})
+}

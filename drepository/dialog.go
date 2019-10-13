@@ -25,12 +25,21 @@ type Dialog struct {
 }
 
 // Delete deletes documents
-func (mc *Dialog) Delete(id, applicationID string) (int64, error) {
+func (mc *Dialog) Delete() (int64, error) {
 	collection := client.Database(dbName).Collection("dialogs_" + mc.ApplicationID)
 	ctx, _ = context.WithTimeout(context.Background(), 5*time.Second)
-	deleteResult, err := collection.DeleteOne(ctx, bson.M{"_id": mc.ID})
 
-	return deleteResult.DeletedCount, err
+	updated, err := collection.UpdateOne(
+		ctx,
+		bson.M{"_id": mc.ID},
+		bson.M{"$set": bson.M{"deletedat": time.Now().String()}},
+	)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return updated.ModifiedCount, err
 }
 
 // Update updates documents
