@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"bytes"
+	"errors"
 	"io"
 	"messenger/drepository"
 	"messenger/dto"
@@ -35,12 +36,40 @@ func CreateManager(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"result": manager})
 }
 
+// ConfirmEmail sets email as confirmed
+func ConfirmEmail(c *gin.Context) {
+	managerID, ok := getLoggedManagerID(c)
+
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": errors.New("User is unauthorized"),
+		})
+		c.Abort()
+		return
+	}
+
+	manager := &drepository.Manager{}
+
+	find := &dto.FindManagers{ID: managerID}
+	update := &dto.UpdateManager{IsConfirmed: true}
+	_, err := manager.Update(find, update)
+
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": err.Error(),
+		})
+		c.Abort()
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"result": manager})
+}
+
 // FindOneManager search manager
 func FindOneManager(c *gin.Context) {
-	id, _ := c.Get("managerID")
-	objectID, _ := primitive.ObjectIDFromHex(id.(string))
+	managerID, _ := getLoggedManagerID(c)
 
-	find := &dto.FindManagers{ID: objectID}
+	find := &dto.FindManagers{ID: managerID}
 	err := c.ShouldBind(find)
 
 	if err != nil {
@@ -58,6 +87,7 @@ func FindOneManager(c *gin.Context) {
 		return
 	}
 
+	manager.Password = ""
 	c.JSON(http.StatusOK, gin.H{"result": manager})
 }
 
@@ -69,10 +99,9 @@ func UpdateManager(c *gin.Context) {
 	updateManager := &dto.UpdateManager{}
 	err := c.ShouldBind(updateManager)
 
-	id, _ := c.Get("managerID")
-	objectID, _ := primitive.ObjectIDFromHex(id.(string))
+	managerID, _ := getLoggedManagerID(c)
 
-	findMenager := &dto.FindManagers{ID: objectID}
+	findMenager := &dto.FindManagers{ID: managerID}
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -92,7 +121,6 @@ func UpdateManager(c *gin.Context) {
 	manager.Password = ""
 
 	c.JSON(http.StatusOK, gin.H{"result": manager})
-
 }
 
 //UpdateManagerAvatar updates manager avatar
@@ -155,3 +183,13 @@ func UpdateManagerAvatar(c *gin.Context) {
 
 // DeleteManager removes manager
 func DeleteManager(c *gin.Context) {}
+
+func getLoggedManagerID(c *gin.Context) (id primitive.ObjectID, ok bool) {
+	managerID, _ := c.Get("managerID")
+	objectID, err := primitive.ObjectIDFromHex(managerID.(string))
+
+	ok = err != nil
+	id = objectID
+
+	return
+}

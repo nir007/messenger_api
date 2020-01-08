@@ -6,8 +6,8 @@ import (
 	"messenger/dto"
 	"net/http"
 
-	"github.com/google/uuid"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -87,7 +87,7 @@ func FindAllApp(c *gin.Context) {
 	apps, total, err := app.Find(find)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error(),"code": FindDbError})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error(), "code": FindDbError})
 		c.Abort()
 		return
 	}

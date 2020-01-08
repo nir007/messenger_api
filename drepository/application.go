@@ -2,10 +2,10 @@ package drepository
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"messenger/dto"
 	"time"
-	"errors"
 
 	uuid "github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
@@ -21,6 +21,7 @@ type Application struct {
 	Secret      string             `json:"secret"`
 	Salt        string             `json:"salt"`
 	Domains     []string           `json:"domains" binding:"required"`
+	IsActive    bool               `json:"isActive" binding:"omitempty"`
 	CreatedAt   string             `json:"createdAt" binding:"-" `
 	UpdatedAt   string             `json:"updatedAt" binding:"-"`
 	DeletedAt   string             `json:"deletedAt" binding:"-"`

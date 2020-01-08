@@ -1,6 +1,7 @@
 package dto
 
 import (
+	"fmt"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -13,6 +14,7 @@ type UpdateApplication struct {
 	Name        string             `json:"name" binding:"max=50,min=1" bson:"name,omitempty"`
 	Description string             `json:"description" binding:"max=100,min=1" bson:"description,omitempty"`
 	Domains     []string           `json:"domains" bson:"domains,omitempty"`
+	IsActive    bool               `json:"isActive" bson:"isactive,omitempty"`
 	Managers    []string           `json:"managers" bson:"managers,omitempty"`
 	Secret      string             `json:"secret" binding:"-" bson:"secret,omitempty"`
 	Salt        string             `json:"salt" bson:"salt,omitempty"`
@@ -24,22 +26,33 @@ func (f *UpdateApplication) ToBson() bson.M {
 	f.UpdatedAt = time.Now().String()
 	b, _ := bson.Marshal(f)
 
+	fmt.Println(f)
+
 	var dataM bson.M
 	_ = bson.Unmarshal(b, &dataM)
 
+	if !f.IsActive {
+		dataM["isactive"] = false
+	}
+
+	if len(f.Domains) == 0 {
+		dataM["domains"] = []string{}
+	}
+
+	fmt.Println(dataM)
 	return dataM
 }
 
 // UpdateUser struct for updating application user
 type UpdateUser struct {
-	ID          primitive.ObjectID `json:"id" binding:"-" bson:"_id,omitempty"`
-	UID        string              `json:"uid" bson:"uid,omitempty"`
-	Name        string             `json:"name" binding:"max=50,min=1" bson:"name,omitempty"`
-	SecondName  string             `json:"second" binding:"max=100,min=1" bson:"description,omitempty"`
-	BlackList   []string           `json:"blackList" bson:"blacklist,omitempty"`
-	Email       string             `json:"email" bson:"email,omitempty"`
-	Phone       string             `json:"phone"  bson:"phone,omitempty"`
-	UpdatedAt   string             `json:"updatedAt" binding:"-" bson:"updatedat,omitempty"`
+	ID         primitive.ObjectID `json:"id" binding:"-" bson:"_id,omitempty"`
+	UID        string             `json:"uid" bson:"uid,omitempty"`
+	Name       string             `json:"name" binding:"max=50,min=1" bson:"name,omitempty"`
+	SecondName string             `json:"second" binding:"max=100,min=1" bson:"description,omitempty"`
+	BlackList  []string           `json:"blackList" bson:"blacklist,omitempty"`
+	Email      string             `json:"email" bson:"email,omitempty"`
+	Phone      string             `json:"phone"  bson:"phone,omitempty"`
+	UpdatedAt  string             `json:"updatedAt" binding:"-" bson:"updatedat,omitempty"`
 }
 
 // ToBson forms bson struct for searching documents

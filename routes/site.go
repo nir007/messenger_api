@@ -12,7 +12,7 @@ func InitSite(r *gin.Engine) {
 	site := r.Group("site")
 
 	site.POST("/registration", handlers.CreateManager)
-	site.GET("/confirm", handlers.CreateManager)
+	site.GET("/confirm/email", handlers.ConfirmEmail)
 	site.POST("/login", ginAuthJWT.LoginHandler)
 
 	admin := r.Group("admin")

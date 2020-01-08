@@ -9,7 +9,6 @@ import (
 
 func main() {
 	r := gin.Default()
-
 	r.Use(routes.CORS())
 
 	routes.InitSite(r)
