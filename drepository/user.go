@@ -6,10 +6,11 @@ import (
 	"messenger/dto"
 	"time"
 
+	"errors"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"errors"
 )
 
 // User struct for messenger app users
@@ -24,6 +25,7 @@ type User struct {
 	Links         []string           `json:"links"`
 	Email         string             `json:"email" binding:"omitempty,email"`
 	Phone         string             `json:"phone"`
+	About         string             `json:"about" binding:"omitempty,email"`
 	BlackList     []string           `json:"blackList"`
 	CreatedAt     string             `json:"createdAt" binding:"-"`
 	UpdatedAt     string             `json:"updatedAt" binding:"-"`
@@ -76,7 +78,7 @@ func (mc *User) Insert() (string, error) {
 	find := &dto.FindUsers{UID: mc.UID}
 
 	if err := mc.FindOne(find); err == nil {
-		return "", fmt.Errorf("user with id: %s already exists", find.UID)
+		return "", fmt.Errorf("user with UID: %s already exists", find.UID)
 	}
 
 	collection := client.Database(dbName).Collection("users_" + mc.ApplicationID)
