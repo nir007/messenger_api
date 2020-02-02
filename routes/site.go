@@ -2,9 +2,8 @@ package routes
 
 import (
 	"messenger/handlers"
-	"messenger/middlewares"
-
 	"github.com/gin-gonic/gin"
+	m "messenger/middlewares"
 )
 
 //InitSite adds routes for site gui
@@ -17,25 +16,24 @@ func InitSite(r *gin.Engine) {
 
 	admin := r.Group("admin")
 	admin.Use(ginAuthJWT.MiddlewareFunc())
-	//manage.Use(handlers.ApplcationAccess())
 
 	admin.POST("/applications", handlers.CreateApp)
-	admin.GET("/applications/:id", handlers.FindOneApp)
+	admin.GET("/applications/:appID", m.SiteApplicationAccess, handlers.FindOneApp)
 	admin.GET("/applications", handlers.FindAllApp)
-	admin.PUT("/applications/:id", handlers.UpdateApp)
-	admin.DELETE("/applications/:id", handlers.DeleteApp)
+	admin.PUT("/applications/:appID", m.SiteApplicationAccess, handlers.UpdateApp)
+	admin.DELETE("/applications/:appID", m.SiteApplicationAccess, handlers.DeleteApp)
 
-	admin.POST("/users", handlers.CreateUser)
-	admin.GET("/user/:id/:appID", handlers.FindOneUser)
-	admin.GET("/users/:appID", handlers.FindAllUsers)
-	admin.PUT("/users/:id/:appID", handlers.UpdateUser)
-	admin.DELETE("/users/:id/:appID", handlers.DeleteUser)
+	admin.POST("/users", m.SiteApplicationAccess, handlers.CreateUser)
+	admin.GET("/user/:id/:appID", m.SiteApplicationAccess, handlers.FindOneUser)
+	admin.GET("/users/:appID", m.SiteApplicationAccess, handlers.FindAllUsers)
+	admin.PUT("/users/:id/:appID", m.SiteApplicationAccess, handlers.UpdateUser)
+	admin.DELETE("/users/:id/:appID", m.SiteApplicationAccess, handlers.DeleteUser)
 
-	admin.POST("/messages", middlewares.Blacklist, handlers.CreateMessage)
-	admin.GET("/messages/:id", handlers.FindOneMessage)
-	admin.GET("/messages", handlers.FindAllMessages)
-	admin.PUT("/messages", handlers.UpdateMessage)
-	admin.DELETE("/messages/:id", handlers.DeleteMessage)
+	admin.POST("/messages", m.SiteApplicationAccess, m.Blacklist, handlers.CreateMessage)
+	admin.GET("/messages/:id", m.SiteApplicationAccess, handlers.FindOneMessage)
+	admin.GET("/messages", m.SiteApplicationAccess, handlers.FindAllMessages)
+	admin.PUT("/messages", m.SiteApplicationAccess, handlers.UpdateMessage)
+	admin.DELETE("/messages/:id", m.SiteApplicationAccess, handlers.DeleteMessage)
 
 	admin.GET("/managers", handlers.FindOneManager)
 	admin.PUT("/managers", handlers.UpdateManager)

@@ -10,7 +10,7 @@ import (
 // InitREST routes for REST API
 func InitREST(r *gin.Engine) {
 	v1 := r.Group("v1")
-	v1.Use(middlewares.ApplicationAccess)
+	v1.Use(middlewares.ApiApplicationAccess)
 
 	v1.POST("/messages/", middlewares.Blacklist, handlers.CreateMessage)
 	v1.GET("/messages/:dialogid", handlers.FindAllMessages)

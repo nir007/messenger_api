@@ -44,7 +44,7 @@ func CreateApp(c *gin.Context) {
 
 // FindOneApp handles http request
 func FindOneApp(c *gin.Context) {
-	id := c.Param("id")
+	id := c.Param("appID")
 	objectID, err := primitive.ObjectIDFromHex(id)
 
 	if err != nil {
@@ -97,7 +97,7 @@ func FindAllApp(c *gin.Context) {
 
 // UpdateApp changes application
 func UpdateApp(c *gin.Context) {
-	id := c.Param("id")
+	id := c.Param("appID")
 	objectID, err := primitive.ObjectIDFromHex(id)
 
 	if err != nil {
@@ -135,7 +135,7 @@ func UpdateApp(c *gin.Context) {
 
 // DeleteApp marks application as deleted
 func DeleteApp(c *gin.Context) {
-	id := c.Param("id")
+	id := c.Param("appID")
 	objectID, err := primitive.ObjectIDFromHex(id)
 
 	if err != nil {

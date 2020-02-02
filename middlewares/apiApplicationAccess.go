@@ -10,8 +10,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// ApplicationAccess check access to api functions
-func ApplicationAccess(c *gin.Context) {
+// ApiApplicationAccess check access to api functions
+func ApiApplicationAccess(c *gin.Context) {
 	secretKey := c.Request.Header["Secret-Key"]
 	applicationID := c.Request.Header["Application-Id"]
 
